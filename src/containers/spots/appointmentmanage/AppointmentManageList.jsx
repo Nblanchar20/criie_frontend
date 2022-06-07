@@ -113,6 +113,7 @@ function AppointmentManageList(props) {
           firstDate: e.bloques[0].fecha_inicio,
           estado: e.estado,
           id_usuario_recibe: e.id_usuario_recibe,
+          id_usuario: e.id_usuarios,
         });
       });
     });
@@ -235,9 +236,9 @@ function AppointmentManageList(props) {
             <Tooltip title="Editar reserva">
               <IconButton
                 onClick={() => {
-                  if (permission.includes(3)) {
+                  if (appointmentData.id_usuario_recibe === userId) {
                     history.push(
-                      `/reserves/spots/${encrypt(appointmentData.id)}`
+                      `/reserves/ludic/${encrypt(appointmentData.id)}`
                     );
                   }
                 }}
@@ -251,10 +252,8 @@ function AppointmentManageList(props) {
             <Tooltip title="Recibir reserva">
               <IconButton
                 onClick={() => {
-                  if (permission.includes(3)) {
-                    modalAssign(appointmentData.id);
-                    restProps.onHide();
-                  }
+                  modalAssign(appointmentData.id);
+                  restProps.onHide();
                 }}
                 className={classes.commandButton}
                 size="large"
@@ -265,11 +264,12 @@ function AppointmentManageList(props) {
           )}
         </>
       )}
-      {appointmentData.estado === 1 && (
-        <Tooltip title="Cancelar reserva">
-          <IconButton
-            onClick={() => {
-              if (groupId === 3) {
+      {appointmentData.estado === 1 &&
+        (appointmentData.id_usuarios === userId ||
+          [1, 2].includes(groupId)) && (
+          <Tooltip title="Cancelar reserva">
+            <IconButton
+              onClick={() => {
                 if (new Date(appointmentData.firstDate) > new Date()) {
                   modalDelete(appointmentData.id);
                   restProps.onHide();
@@ -279,15 +279,14 @@ function AppointmentManageList(props) {
                     text: "La reserva ya no puede ser cancelada debido a que ya se cumplió su tiempo.",
                   });
                 }
-              }
-            }}
-            className={classes.commandButton}
-            size="large"
-          >
-            <CancelIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+              }}
+              className={classes.commandButton}
+              size="large"
+            >
+              <CancelIcon />
+            </IconButton>
+          </Tooltip>
+        )}
     </AppointmentTooltip.Header>
   );
 
@@ -310,7 +309,6 @@ function AppointmentManageList(props) {
                 inputVariant="outlined"
                 label="Fecha a revisar"
                 fullWidth
-                minDate={new Date()}
                 autoOk
                 value={reserveDate}
                 onChange={(date) => setReserveDate(date)}
@@ -347,10 +345,7 @@ function AppointmentManageList(props) {
 
           <Scheduler data={bookings} locale={"es-ES"}>
             <ViewState currentDate={reserveDate} />
-            <WeekView
-              startDayHour={8}
-              endDayHour={18}
-            />
+            <WeekView startDayHour={8} endDayHour={18} />
             <Appointments />
             <AppointmentTooltip
               showCloseButton

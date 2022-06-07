@@ -41,6 +41,10 @@ function LudicAppointmentManageList(props) {
   const [reserveDate, setReserveDate] = useState(new Date());
   const [spots, setSpots] = useState([]);
   const [currentSpot, setCurrentSpot] = useState("");
+  const [ludic, setLudic] = useState([]);
+  const [currentLudic, setCurrentLudic] = useState("");
+  const [existences, setExistences] = useState([]);
+  const [currentExistence, setCurrentExistence] = useState("");
 
   useEffect(() => {
     if (permission.includes(1)) {
@@ -55,10 +59,40 @@ function LudicAppointmentManageList(props) {
 
   useEffect(() => {
     if (currentSpot !== null && `${currentSpot}`.trim()) {
-      getBookings();
+      getLudic();
+      setCurrentExistence("");
+    } else {
+      setCurrentLudic("");
+      setLudic([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSpot]);
+
+  useEffect(() => {
+    if (currentExistence !== null && `${currentExistence}`.trim()) {
+      getBookings();
+    } else {
+      setBookings([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentExistence]);
+
+  useEffect(() => {
+    if (currentLudic !== null && `${currentLudic}`.trim()) {
+      let existences = ludic.filter((e) => e.id === currentLudic);
+      if (existences.length > 0 && existences[0].existencias.length > 0) {
+        setCurrentExistence(existences[0]?.existencias[0].id);
+        setExistences(existences[0]?.existencias);
+      } else {
+        setExistences([]);
+        setCurrentExistence("");
+      }
+    } else {
+      setExistences([]);
+      setCurrentExistence("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLudic]);
 
   const getSpots = async () => {
     const { data } = await axios.post(
@@ -72,6 +106,21 @@ function LudicAppointmentManageList(props) {
     setSpots(data?.spots);
   };
 
+  const getLudic = async () => {
+    const { data } = await axios.post(
+      `/ludicResources/getLudicResources`,
+      {
+        id_espacios: currentSpot,
+      },
+      {
+        headers: { "access-token": token },
+      }
+    );
+    setLudic(data?.ludicResources);
+
+    setCurrentLudic(data?.ludicResources[0]?.id || "");
+  };
+
   const getBookings = async () => {
     try {
       setLoading(true);
@@ -79,21 +128,22 @@ function LudicAppointmentManageList(props) {
       if (groupId === 3) {
         where.id_usuarios = userId;
       }
-      if (currentSpot) {
-        where.id_espacios = currentSpot;
+      if (currentExistence) {
+        where.id_existencia_recurso = currentExistence;
       }
       const { data } = await axios.post(
-        `/spotBooking/getSpotsBookings`,
+        `/ludicResourcesBooking/getLudicResourcesBooking`,
         where,
         {
           headers: { "access-token": token },
         }
       );
-      setBookings(convertBookingsToAppointments(data.spotBookings));
+      setBookings(convertBookingsToAppointments(data.ludicResourcesBookings));
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      history.push("/reserve/spots");
+      console.error(error);
+      history.push("/reserve/ludic");
       window.location.reload();
     }
   };
@@ -108,11 +158,12 @@ function LudicAppointmentManageList(props) {
           endDate: e2.fecha_fin,
           title: `Reserva por ${e.solicitante.nombres || ""} ${
             e.solicitante.apellidos || ""
-          }, espacio ${e.espacio.nombre}, estado: ${estado}`.trim(),
+          }, recurso ${e.existencia.recurso.nombre}, estado: ${estado}`.trim(),
           id: e.id,
           firstDate: e.bloques[0].fecha_inicio,
           estado: e.estado,
           id_usuario_recibe: e.id_usuario_recibe,
+          id_usuario: e.id_usuarios,
         });
       });
     });
@@ -137,7 +188,7 @@ function LudicAppointmentManageList(props) {
   const sendApprove = async (id) => {
     setLoading(true);
     axios
-      .delete(`/spotBooking/${id}`, {
+      .delete(`/ludicResourcesBooking/${id}`, {
         headers: { "access-token": token },
       })
       .then((res) => {
@@ -189,7 +240,7 @@ function LudicAppointmentManageList(props) {
     setLoading(true);
     axios
       .put(
-        `/spotBooking/${id}`,
+        `/ludicResourcesBooking/${id}`,
         {
           form: { id_usuario_recibe: userId },
         },
@@ -235,9 +286,9 @@ function LudicAppointmentManageList(props) {
             <Tooltip title="Editar reserva">
               <IconButton
                 onClick={() => {
-                  if (permission.includes(3)) {
+                  if (appointmentData.id_usuario_recibe === userId) {
                     history.push(
-                      `/reserves/spots/${encrypt(appointmentData.id)}`
+                      `/reserves/ludic/${encrypt(appointmentData.id)}`
                     );
                   }
                 }}
@@ -251,10 +302,8 @@ function LudicAppointmentManageList(props) {
             <Tooltip title="Recibir reserva">
               <IconButton
                 onClick={() => {
-                  if (permission.includes(3)) {
-                    modalAssign(appointmentData.id);
-                    restProps.onHide();
-                  }
+                  modalAssign(appointmentData.id);
+                  restProps.onHide();
                 }}
                 className={classes.commandButton}
                 size="large"
@@ -265,11 +314,12 @@ function LudicAppointmentManageList(props) {
           )}
         </>
       )}
-      {appointmentData.estado === 1 && (
-        <Tooltip title="Cancelar reserva">
-          <IconButton
-            onClick={() => {
-              if (groupId === 3) {
+      {appointmentData.estado === 1 &&
+        (appointmentData.id_usuarios === userId ||
+          [1, 2].includes(groupId)) && (
+          <Tooltip title="Cancelar reserva">
+            <IconButton
+              onClick={() => {
                 if (new Date(appointmentData.firstDate) > new Date()) {
                   modalDelete(appointmentData.id);
                   restProps.onHide();
@@ -279,15 +329,14 @@ function LudicAppointmentManageList(props) {
                     text: "La reserva ya no puede ser cancelada debido a que ya se cumplió su tiempo.",
                   });
                 }
-              }
-            }}
-            className={classes.commandButton}
-            size="large"
-          >
-            <CancelIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+              }}
+              className={classes.commandButton}
+              size="large"
+            >
+              <CancelIcon />
+            </IconButton>
+          </Tooltip>
+        )}
     </AppointmentTooltip.Header>
   );
 
@@ -310,7 +359,6 @@ function LudicAppointmentManageList(props) {
                 inputVariant="outlined"
                 label="Fecha a revisar"
                 fullWidth
-                minDate={new Date()}
                 autoOk
                 value={reserveDate}
                 onChange={(date) => setReserveDate(date)}
@@ -341,16 +389,65 @@ function LudicAppointmentManageList(props) {
                 </Select>
               </FormControl>
             </Grid>
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="ludicLabel">Recurso lúdico</InputLabel>
+                <Select
+                  labelId="ludicLabel"
+                  label="Recurso lúdico"
+                  value={currentLudic}
+                  name="id_recursos_ludicos"
+                  onChange={(e) => {
+                    setCurrentLudic(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione una opción</em>
+                  </MenuItem>
+                  {ludic
+                    .sort((a, b) => (a.nombre > b.nombre ? 1 : -1))
+                    .map((e) => (
+                      <MenuItem key={e.id} value={e.id}>
+                        {e.nombre}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="existenceLabel">Existencia</InputLabel>
+                <Select
+                  labelId="existenceLabel"
+                  label="Existencia"
+                  value={currentExistence}
+                  name="id_existencia"
+                  onChange={(e) => {
+                    setCurrentExistence(e.target.value);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione una opción</em>
+                  </MenuItem>
+                  {existences
+                    .sort((a, b) =>
+                      a.codigo_barras > b.codigo_barras ? 1 : -1
+                    )
+                    .map((e) => (
+                      <MenuItem key={e.id} value={e.id}>
+                        {e.codigo_barras}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
           <br />
           <br />
 
           <Scheduler data={bookings} locale={"es-ES"}>
             <ViewState currentDate={reserveDate} />
-            <WeekView
-              startDayHour={8}
-              endDayHour={18}
-            />
+            <WeekView startDayHour={8} endDayHour={18} />
             <Appointments />
             <AppointmentTooltip
               showCloseButton
