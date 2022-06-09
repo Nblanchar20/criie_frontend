@@ -38,6 +38,7 @@ import LudicAppointmentList from "../containers/ludicresources/appointment/Ludic
 import LudicAppointmentForm from "../containers/ludicresources/appointment/LudicAppointmentForm";
 import LudicAppointmentManageList from "../containers/ludicresources/appointmentmanage/LudicAppointmentManageList";
 import LudicAppointmentManageForm from "../containers/ludicresources/appointmentmanage/LudicAppointmentManageForm";
+import Logs from "../containers/log/Logs";
 
 const SwitchApp = () => {
   const location = useLocation();
@@ -131,6 +132,8 @@ const SwitchApp = () => {
             <Route path="/reserve/ludic/:id" component={LudicAppointmentForm} />
             <Route path="/reserves/ludic" exact component={LudicAppointmentManageList} />
             <Route path="/reserves/ludic/:id" component={LudicAppointmentManageForm} />
+
+            <Route path="/logs" exact component={Logs} />
           </Layout>
         </Switch>
       </Switch>
