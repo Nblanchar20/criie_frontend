@@ -14,8 +14,19 @@ import Modules from "../containers/settings/modules/Modules";
 import ModulesForm from "../containers/settings/modules/Form";
 import UserGroups from "../containers/settings/userGroups/UserGroups";
 import FormUserGroups from "../containers/settings/userGroups/Form";
+
+// Vistas utilizadas 
 import Users from "../containers/settings/users/Users";
 import UsersForm from "../containers/settings/users/Form";
+import Projects from "../containers/projects/Projects";
+import ProjectsForm from "../containers/projects/Form";
+import ProjectsInfomation from "../containers/projects/Information";
+import ObjectivesForm from "../containers/projects/objectives/Form";
+import BudgetsForm from "../containers/projects/budgets/Form";
+import DeliverablesForm from "../containers/projects/deliverables/Form";
+import IndicatorsForm from "../containers/projects/indicators/Form";
+import ActivitiesForm from "../containers/projects/indicators/activities/Form";
+
 import Parameters from "../containers/settings/parameters/Parameters";
 import ParametersForm from "../containers/settings/parameters/Form";
 import Permissions from "../containers/settings/permissions/Permissions";
@@ -76,9 +87,34 @@ const SwitchApp = () => {
             <Route path="/userGroups/create" component={FormUserGroups} />
             <Route path="/userGroups/edit/:id" component={FormUserGroups} />
 
+            {/* Rutas ulitizadas */}
             <Route path="/users" exact component={Users} />
             <Route path="/users/create" component={UsersForm} />
             <Route path="/users/edit/:id" component={UsersForm} />
+            
+            <Route path="/projects" exact component={Projects} />
+            <Route path="/projects/create" component={ProjectsForm} />
+            <Route path="/projects/edit/:id" component={ProjectsForm} />
+            <Route path="/projects/information/:id" component={ProjectsInfomation} />
+            
+            <Route path="/objectives/create" component={ObjectivesForm} />
+            <Route path="/objectives/edit/:id" component={ObjectivesForm} />
+
+            <Route path="/deliverables/create" component={DeliverablesForm} />
+            <Route path="/deliverables/edit/:id" component={DeliverablesForm} />
+
+            <Route path="/budgets/create" component={BudgetsForm} />
+            <Route path="/budgets/edit/:id" component={BudgetsForm} />
+            
+            <Route path="/indicators/create" component={IndicatorsForm} />
+            <Route path="/indicators/edit/:id" component={IndicatorsForm} />
+
+            <Route path="/activities/create" component={ActivitiesForm} />
+            <Route path="/activities/edit/:id" component={ActivitiesForm} />
+
+
+
+
 
             <Route path="/parameters" exact component={Parameters} />
             <Route path="/parameters/create" component={ParametersForm} />

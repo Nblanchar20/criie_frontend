@@ -107,6 +107,72 @@ const Menu = (props) => {
         <Divider className={classes.divider} />
         <div>
           <List className={classes.list}>
+            {permission.includes(8) && (
+              <>
+                <ListItem button onClick={() => toLink("/users")}>
+                  <ListItemIcon>
+                    <PersonOutline className={classes.icon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Usuarios" />
+                </ListItem>
+              </>
+            )}
+            {(
+              permission.includes(9) ||
+              permission.includes(10) ||
+              permission.includes(11) ||
+              permission.includes(12) ||
+              permission.includes(13)) && (
+              <>
+                <ListItem button onClick={() => handleChange("panel2")}>
+                  <ListItemIcon>
+                    <BarChart className={classes.icon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Proyectos" />
+                </ListItem>
+                <Collapse
+                  in={selected === "panel2"}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  {permission.includes(9) && (
+                    <List component="div" disablePadding>
+                      <ListItem button onClick={() => toLink("/projects")}>
+                        <ListItemText inset primary="Lista Proyectos" />
+                      </ListItem>
+                    </List>
+                  )}
+                  {permission.includes(10) && (
+                    <List component="div" disablePadding>
+                      <ListItem button onClick={() => toLink("/objectives/create")}>
+                        <ListItemText inset primary="Objetivos" />
+                      </ListItem>
+                    </List>
+                  )}
+                  {permission.includes(11) && (
+                    <List component="div" disablePadding>
+                      <ListItem button onClick={() => toLink("/indicators/create")}>
+                        <ListItemText inset primary="Indicadores" />
+                      </ListItem>
+                    </List>
+                  )}
+                  {permission.includes(12) && (
+                    <List component="div" disablePadding>
+                      <ListItem button onClick={() => toLink("/budgets/create")}>
+                        <ListItemText inset primary="Presupuesto" />
+                      </ListItem>
+                    </List>
+                  )}
+                  {permission.includes(13) && (
+                    <List component="div" disablePadding>
+                      <ListItem button onClick={() => toLink("/deliverables/create")}>
+                        <ListItemText inset primary="Entregables" />
+                      </ListItem>
+                    </List>
+                  )}
+                </Collapse>
+              </>
+            )}
             {(permission.includes(1) ||
               permission.includes(2) ||
               permission.includes(3) ||
@@ -130,13 +196,6 @@ const Menu = (props) => {
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/userGroups")}>
                         <ListItemText inset primary="Grupos de usuarios" />
-                      </ListItem>
-                    </List>
-                  )}
-                  {permission.includes(2) && (
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/users")}>
-                        <ListItemText inset primary="Usuarios" />
                       </ListItem>
                     </List>
                   )}
@@ -178,174 +237,6 @@ const Menu = (props) => {
                 </Collapse>
               </>
             )}
-            {permission.includes(8) && (
-              <>
-                <ListItem button onClick={() => toLink("/approve")}>
-                  <ListItemIcon>
-                    <PersonOutline className={classes.icon} />
-                  </ListItemIcon>
-                  <ListItemText primary="Aprobación de usuarios" />
-                </ListItem>
-              </>
-            )}
-            {(permission.includes(9) ||
-              permission.includes(10) ||
-              permission.includes(11)) && (
-              <>
-                <ListItem button onClick={() => handleChange("panel3")}>
-                  <ListItemIcon>
-                    <Business className={classes.icon} />
-                  </ListItemIcon>
-                  <ListItemText primary="Espacios" />
-                </ListItem>
-                <Collapse
-                  in={selected === "panel3"}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  {permission.includes(9) && (
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/spots")}>
-                        <ListItemText inset primary="Gestión de espacios" />
-                      </ListItem>
-                    </List>
-                  )}
-                  {permission.includes(10) && (
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        onClick={() => toLink("/reserves/spots")}
-                      >
-                        <ListItemText
-                          inset
-                          primary="Gestión de reservas de espacios"
-                        />
-                      </ListItem>
-                    </List>
-                  )}
-                  {permission.includes(11) && (
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        onClick={() => toLink("/reserve/spots")}
-                      >
-                        <ListItemText inset primary="Reserva de espacios" />
-                      </ListItem>
-                    </List>
-                  )}
-                </Collapse>
-              </>
-            )}
-
-            {(permission.includes(12) ||
-              permission.includes(13) ||
-              permission.includes(14)) && (
-              <>
-                <ListItem button onClick={() => handleChange("panel4")}>
-                  <ListItemIcon>
-                    <Toys className={classes.icon} />
-                  </ListItemIcon>
-                  <ListItemText primary="Recursos lúdicos" />
-                </ListItem>
-                <Collapse
-                  in={selected === "panel4"}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  {permission.includes(12) && (
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/ludic")}>
-                        <ListItemText
-                          inset
-                          primary="Gestión de recursos lúdicos"
-                        />
-                      </ListItem>
-                    </List>
-                  )}
-                  {permission.includes(13) && (
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        onClick={() => toLink("/reserves/ludic")}
-                      >
-                        <ListItemText
-                          inset
-                          primary="Gestión de reservas de recursos lúdicos"
-                        />
-                      </ListItem>
-                    </List>
-                  )}
-                  {permission.includes(14) && (
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/reserve/ludic")}>
-                        <ListItemText
-                          inset
-                          primary="Reserva de recursos lúdicos"
-                        />
-                      </ListItem>
-                    </List>
-                  )}
-                </Collapse>
-              </>
-            )}
-
-            {permission.includes(15) && (
-              <>
-                <ListItem button onClick={() => toLink("/reports")}>
-                  <ListItemIcon>
-                    <BarChart className={classes.icon} />
-                  </ListItemIcon>
-                  <ListItemText primary="Reportes" />
-                </ListItem>
-              </>
-            )}
-            {permission.includes(16) && (
-              <>
-                <ListItem button onClick={() => toLink("/logs")}>
-                  <ListItemIcon>
-                    <Book className={classes.icon} />
-                  </ListItemIcon>
-                  <ListItemText primary="Logs" />
-                </ListItem>
-              </>
-            )}
-
-            <ListItem button onClick={() => handleChange("panel6")}>
-              <ListItemIcon>
-                <Person className={classes.icon} />
-              </ListItemIcon>
-              <ListItemText primary="Perfil" />
-            </ListItem>
-            <Collapse in={selected === "panel6"} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <ListItem
-                  button
-                  onClick={() => toLink(`/profile/edit/${encrypt(user.id)}`)}
-                >
-                  <ListItemText inset primary="Editar perfil" />
-                </ListItem>
-              </List>
-              <List component="div" disablePadding>
-                <ListItem
-                  button
-                  onClick={() =>
-                    toLink(`/profile/password/${encrypt(user.id)}`)
-                  }
-                >
-                  <ListItemText inset primary="Cambiar contraseña" />
-                </ListItem>
-              </List>
-            </Collapse>
-            <ListItem button onClick={handleSesion}>
-              <ListItemIcon>
-                <FontAwesomeIcon
-                  icon={faSignOutAlt}
-                  size={"lg"}
-                  className={classes.iconAwesome}
-                />
-              </ListItemIcon>
-              <ListItemText primary="Cerrar sesión" />
-            </ListItem>
           </List>
         </div>
       </Drawer>

@@ -26,9 +26,9 @@ function SignIn(props) {
 
   if (Object.keys(user || {}).length > 0) {
     if (user?.id_grupos_usuarios === 1 || user?.id_grupos_usuarios === 2) {
-      history.push("/users");
+      history.push("/users"); 
     } else {
-      history.push("/type");
+       history.push("/type");
       window.location.reload();
     }
   }
@@ -55,9 +55,10 @@ function SignIn(props) {
             res.data?.user?.user?.id_grupos_usuarios === 2
           ) {
             history.push("/users");
+            console.log(res.data)
           } else {
             history.push("/reserve/spots");
-            window.location.reload();
+            window.location.reload(); 
           }
           setLoading(false);
         } else {

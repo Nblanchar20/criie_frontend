@@ -10,18 +10,19 @@ import {
   Tooltip,
   IconButton,
 } from "@material-ui/core";
-import { setBreadcrumps } from "../../../actions";
-import { encrypt } from "../../../utils/crypt";
+import { setBreadcrumps } from "../../actions";
+import { encrypt } from "../../utils/crypt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit } from "@fortawesome/free-regular-svg-icons";
-import Table from "../../../components/Table";
-import Header from "../../../components/Header";
+import { faEdit,faListAlt } from "@fortawesome/free-regular-svg-icons";
+import Table from "../../components/Table";
+import Header from "../../components/Header";
 import DeleteIcon from "@material-ui/icons/HighlightOff";
-import axios from "../../../api";
+import axios from "../../api";
 import Swal from "sweetalert2";
-import Backdrop from "../../../components/Backdrop";
+import Backdrop from "../../components/Backdrop";
+import {FindInPageOutlined } from "@material-ui/icons";
 
-function Users(props) {
+function Projects(props) {
   const {
     userId,
     page,
@@ -33,15 +34,19 @@ function Users(props) {
   } = props;
   const history = useHistory();
   const theme = useTheme();
-  const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [filtro, setFiltro] = useState([]);
   const [dataExcel, setDataExcel] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {   
-      getUsers();
-      setBreadcrumps([{ name: "Configuración" }, { name: "Usuarios" }]);
-    
+  useEffect(() => {
+    if (permission.includes(1)) {
+      getProjects();
+      setBreadcrumps([{ name: "Lista de Proyectos" }]);
+    } else {
+      history.push("/");
+      window.location.reload();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -49,25 +54,27 @@ function Users(props) {
     dataToExcel(filtro);
   }, [filtro]);
 
-  const getUsers = async () => {
+  const getProjects = async () => {
     const { data } = await axios.post(
-      `/user/getUsers`,
+      `/project/getProjects`,
       {},
       {
         headers: { "access-token": token },
       }
     );
     if (groupId === 1) {
-      setUsers(data?.users);
-      setFiltro(data?.users);
-      dataToExcel(data?.users);
+      setProjects(data?.projects);
+      setFiltro(data?.projects);
+      dataToExcel(data?.projects);
+      
+      
     } else {
-      const usersFiltered = data.users.filter(
+      const projectsFiltered = data.projects.filter(
         (item) => item.id_grupos_usuarios !== 1
       );
-      setUsers(usersFiltered);
-      setFiltro(usersFiltered);
-      dataToExcel(usersFiltered);
+      setProjects(projectsFiltered);
+      setFiltro(projectsFiltered);
+      dataToExcel(projectsFiltered);
     }
   };
 
@@ -77,11 +84,14 @@ function Users(props) {
         modalDelete(id);
         break;
       case "edit":
-        history.push(`/users/edit/${encrypt(id)}`);
+        history.push(`/projects/edit/${encrypt(id)}`);
         break;
       case "create":
-        history.push(`/users/create`);
+        history.push(`/projects/create`);
         break;
+        case "view":
+          history.push(`/projects/information/${encrypt(id)}`);
+          break;
       default:
         break;
     }
@@ -89,7 +99,7 @@ function Users(props) {
 
   const modalDelete = (id) => {
     Swal.fire({
-      text: "¿Está seguro que desea eliminar este usuario?",
+      text: "¿Está seguro que desea eliminar este Proyecto?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -105,12 +115,12 @@ function Users(props) {
 
   const sendDelete = async (id) => {
     setLoading(true);
-    const { data } = await axios.delete(`/user/${id}`, {
-      data: { id_usuarios: userId },
+    const { data } = await axios.delete(`/project/${id}`, {      
       headers: { "access-token": token },
     });
-    if (data.userId?.success) {
-      setFiltro(users.filter((item) => item.id !== id));
+    console.log(data)
+    if (data.projectId) {
+      setFiltro(projects.filter((item) => item.id !== id));
       setLoading(false);
       Swal.fire({
         text: "Eliminado exitosamente.",
@@ -150,11 +160,11 @@ function Users(props) {
         search={true}
         button={permission.includes(2) ? true : false}
         exportButton={permission.includes(5) ? true : false}
-        dataToExcel={{ csvData: dataExcel, fileName: "Usuarios" }}
+        dataToExcel={{ csvData: dataExcel, fileName: "Proyectos" }}
         buttonText={"Crear"}
-        buttonRoute={"/users/create"}
-        tableName={"users"}
-        items={users}
+        buttonRoute={"/projects/create"}
+        tableName={"projects"}
+        items={projects}
         setItems={setFiltro}
       />
       <Table columns={columns} rows={filtro}>
@@ -165,13 +175,22 @@ function Users(props) {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => (
                   <TableRow key={`row${index}`}>
-                    <TableCell align="center">{row.documento}</TableCell>
-                    <TableCell align="center">{row.nombres}</TableCell>
-                    <TableCell align="center">{row.apellidos}</TableCell>
-                    <TableCell align="center">{row.email}</TableCell>
-                    <TableCell align="center">{row.telefono}</TableCell>
+                    <TableCell align="center">{row.nombre}</TableCell>
+                    <TableCell align="center">{row.fecha_inicio}</TableCell>
+                    <TableCell align="center">{row.fecha_fin}</TableCell>
+                    <TableCell align="center">{row.fecha_inicio_esperado}</TableCell>
+                    <TableCell align="center">{row.fecha_fin_esperado}</TableCell>
                     <TableCell align="center">
-                      {row.grupoUsuarios?.nombre}
+                    {permission.includes(3) && (
+                        <Tooltip title="Ver mas">
+                          <IconButton
+                            aria-label="edit"
+                            onClick={(e) => handleClick(e, row.id, "view")}
+                          >
+                            <FindInPageOutlined />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {permission.includes(3) && (
@@ -213,47 +232,46 @@ function Users(props) {
 }
 
 const columns = [
-  {
-    id: "document",
-    label: "Documento",
-    minWidth: 100,
-    align: "center",
-  },
-
+  
   {
     id: "name",
-    label: "Nombres",
+    label: "Nombre",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "lastname",
-    label: "Apellidos",
+    id: "startDate",
+    label: "Fecha Inicio",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "email",
-    label: "Correo electrónico",
+    id: "endDate",
+    label: "Fecha Fin",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "tel",
-    label: "Teléfono",
+    id: "expectedStartDate",
+    label: "Fecha Inicio Esperada",
     minWidth: 100,
     align: "center",
-    super: true,
   },
   {
-    id: "group",
-    label: "Grupo de usuario",
+    id: "expectedEndDate",
+    label: "Fecha Finalización Esperada",
+    minWidth: 100,
+    align: "center",
+  },
+  {
+    id: "info",
+    label: "Información",
     minWidth: 100,
     align: "center",
   },
   {
     id: "actions",
-    label: "",
+    label: "Accciones",
     minWidth: 10,
     align: "center",
     colSpan: 2,
@@ -277,4 +295,4 @@ const mapDispatchToProps = {
   setBreadcrumps,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Users);
+export default connect(mapStateToProps, mapDispatchToProps)(Projects);

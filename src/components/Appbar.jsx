@@ -14,12 +14,23 @@ import {
   logoutRequest,
   setPermissions,
   setDrawer,
+  setPage,
   setExpanded,
   setSelected,
   setToken,
 } from "../actions";
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import KeyIcon from '@mui/icons-material/Key';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
+import Tooltip from "@mui/material/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { encrypt } from "../utils/crypt";
 /* import { AccountCircle } from "@material-ui/icons"; */
 import MenuIcon from "@material-ui/icons/Menu";
 import Swal from "sweetalert2";
@@ -72,6 +83,20 @@ const Appbar = (props) => {
     setDrawer(!drawer);
   };
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const toLink = (ruta) => {
+    setPage(0);
+    setDrawer(false);
+    history.push(ruta);
+  };
+
   return (
     <>
       <AppBar
@@ -104,27 +129,84 @@ const Appbar = (props) => {
           </div>
 
           <div className={classes.appbar__toolbar_logocontainer}></div>
-
-          <div className={classes.container_username}>
-            <Typography
-              align="right"
-              style={{ fontWeight: "bolder", color: "white" }}
-            >
-              {`${user?.nombres?.toUpperCase()} ${user?.apellidos?.toUpperCase()}`}
-            </Typography>
-          </div>
           {/* <AccountCircle color="primary" /> */}
-          <div>
-            <IconButton
-              aria-label="show more"
-              aria-haspopup="true"
-              onClick={handleSesion}
-              //color="primary"
-              style={{ color: "white" }}
-            >
-              <FontAwesomeIcon icon={faSignOutAlt} size={"sm"} />
-            </IconButton>
-          </div>
+          <Tooltip title="Account settings">
+          <IconButton
+            onClick={handleClick}
+            size="small"
+            sx={{ ml: 2 }}
+            aria-controls={open ? "account-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+          >
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "#212121" }}>{`${user?.nombres[0]?.toUpperCase()}${user?.apellidos[0]?.toUpperCase()}`}</Avatar>
+          </IconButton>
+        </Tooltip>
+          <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            '&:before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem>
+          <Avatar />
+          Bienvenido<br/>
+          {`${user?.nombres?.toUpperCase()} ${user?.apellidos?.toUpperCase()}`}
+        </MenuItem>
+        <Divider />
+        <MenuItem
+        onClick={() => toLink(`/profile/edit/${encrypt(user.id)}`)}
+        >
+          <ListItemIcon>
+            <Settings fontSize="small" />
+          </ListItemIcon> Editar Perfil
+        </MenuItem>
+        <MenuItem
+        onClick={() =>
+          toLink(`/profile/password/${encrypt(user.id)}`)
+        }
+        >
+          <ListItemIcon>
+            <KeyIcon fontSize="small" />
+          </ListItemIcon>
+          Cambiar Contraseña
+        </MenuItem>
+        <MenuItem onClick={handleSesion}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
         </Toolbar>
       </AppBar>
       <Drawer
