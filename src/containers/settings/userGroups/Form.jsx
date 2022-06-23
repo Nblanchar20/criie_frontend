@@ -27,7 +27,6 @@ function FormGroup(props) {
   });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
       if (props.match.params.id) {
         getGroup();
         setBreadcrumps([
@@ -42,11 +41,6 @@ function FormGroup(props) {
           { name: "Crear" },
         ]);
       }
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getGroup = async () => {

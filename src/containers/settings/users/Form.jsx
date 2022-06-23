@@ -40,7 +40,6 @@ function FormUser(props) {
   });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
       getUserGroups();
       if (props.match.params.id) {
         getUser();
@@ -56,8 +55,6 @@ function FormUser(props) {
           { name: "Crear" },
         ]);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getUser = async () => {

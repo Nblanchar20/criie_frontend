@@ -42,14 +42,8 @@ function Parameters(props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (permission.includes(1)) {
       getParameters();
       setBreadcrumps([{ name: "Configuración" }, { name: "Parámetros" }]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -152,8 +146,8 @@ function Parameters(props) {
       <Paper elevation={3}>
         <Header
           search={true}
-          button={permission.includes(2) ? true : false}
-          exportButton={permission.includes(5) ? true : false}
+          button={true}
+          exportButton={true}
           dataToExcel={{ csvData: dataExcel, fileName: "Parámetros" }}
           buttonText={"Crear"}
           buttonRoute={"/parameters/create"}
@@ -186,7 +180,6 @@ function Parameters(props) {
                         </Tooltip>
                       </TableCell>
                       <TableCell align="center">
-                        {permission.includes(3) && (
                           <Tooltip title="Editar">
                             <IconButton
                               aria-label="edit"
@@ -195,10 +188,8 @@ function Parameters(props) {
                               <FontAwesomeIcon icon={faEdit} size={"xs"} />
                             </IconButton>
                           </Tooltip>
-                        )}
                       </TableCell>
                       <TableCell align="center">
-                        {permission.includes(4) && (
                           <Tooltip title="Eliminar">
                             <IconButton
                               aria-label="delete"
@@ -207,7 +198,6 @@ function Parameters(props) {
                               <HighlightOff />
                             </IconButton>
                           </Tooltip>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}

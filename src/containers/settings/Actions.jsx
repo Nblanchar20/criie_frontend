@@ -15,14 +15,8 @@ function Actions(props) {
   const [dataExcel, setDataExcel] = useState([]);
 
   useEffect(() => {
-    if (permission.includes(1)) {
       getActions();
       setBreadcrumps([{ name: "Configuración" }, { name: "Acciones" }]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -56,7 +50,7 @@ function Actions(props) {
     <Paper elevation={3}>
       <Header
         button={false}
-        exportButton={permission.includes(5) ? true : false}
+        exportButton={true}
         dataToExcel={{ csvData: dataExcel, fileName: "Acciones" }}
         tableName={"actions"}
         items={actions}

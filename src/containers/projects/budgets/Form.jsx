@@ -33,8 +33,7 @@ function FormUser(props) {
     id_proyectos:"",
   });
 
-  useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
+  useEffect(() => {    
       getProjects();
       if (props.match.params.id) {
         getBudgets();
@@ -50,7 +49,6 @@ function FormUser(props) {
           { name: "Crear" },
         ]);
       }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

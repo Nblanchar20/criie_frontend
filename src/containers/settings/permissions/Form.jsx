@@ -40,7 +40,6 @@ function FormPermissions(props) {
   });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
       getUserGroups();
       getModules();
       if (props.match.params.id) {
@@ -56,8 +55,6 @@ function FormPermissions(props) {
           { name: "Crear" },
         ]);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

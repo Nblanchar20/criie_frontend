@@ -107,7 +107,6 @@ const Menu = (props) => {
         <Divider className={classes.divider} />
         <div>
           <List className={classes.list}>
-            {permission.includes(8) && (
               <>
                 <ListItem button onClick={() => toLink("/users")}>
                   <ListItemIcon>
@@ -116,13 +115,6 @@ const Menu = (props) => {
                   <ListItemText primary="Usuarios" />
                 </ListItem>
               </>
-            )}
-            {(
-              permission.includes(9) ||
-              permission.includes(10) ||
-              permission.includes(11) ||
-              permission.includes(12) ||
-              permission.includes(13)) && (
               <>
                 <ListItem button onClick={() => handleChange("panel2")}>
                   <ListItemIcon>
@@ -135,51 +127,33 @@ const Menu = (props) => {
                   timeout="auto"
                   unmountOnExit
                 >
-                  {permission.includes(9) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/projects")}>
                         <ListItemText inset primary="Lista Proyectos" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(10) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/objectives/create")}>
                         <ListItemText inset primary="Objetivos" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(11) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/indicators/create")}>
                         <ListItemText inset primary="Indicadores" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(12) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/budgets/create")}>
                         <ListItemText inset primary="Presupuesto" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(13) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/deliverables/create")}>
                         <ListItemText inset primary="Entregables" />
                       </ListItem>
                     </List>
-                  )}
                 </Collapse>
               </>
-            )}
-            {(permission.includes(1) ||
-              permission.includes(2) ||
-              permission.includes(3) ||
-              permission.includes(4) ||
-              permission.includes(5) ||
-              permission.includes(6) ||
-              permission.includes(7)) && (
               <>
                 <ListItem button onClick={() => handleChange("panel1")}>
                   <ListItemIcon>
@@ -192,51 +166,38 @@ const Menu = (props) => {
                   timeout="auto"
                   unmountOnExit
                 >
-                  {permission.includes(1) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/userGroups")}>
                         <ListItemText inset primary="Grupos de usuarios" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(3) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/modules")}>
                         <ListItemText inset primary="Módulos" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(4) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/actions")}>
                         <ListItemText inset primary="Acciones" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(5) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/permissions")}>
                         <ListItemText inset primary="Permisos" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(6) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/parameters")}>
                         <ListItemText inset primary="Parámetros" />
                       </ListItem>
                     </List>
-                  )}
-                  {permission.includes(7) && (
                     <List component="div" disablePadding>
                       <ListItem button onClick={() => toLink("/sessions")}>
                         <ListItemText inset primary="Sesiones" />
                       </ListItem>
                     </List>
-                  )}
                 </Collapse>
               </>
-            )}
           </List>
         </div>
       </Drawer>

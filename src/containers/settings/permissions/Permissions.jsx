@@ -40,15 +40,9 @@ function Permissions(props) {
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    if (permission.includes(1)) {
       getPermissions();
       getActions();
       setBreadcrumps([{ name: "Configuración" }, { name: "Permisos" }]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,7 +139,6 @@ function Permissions(props) {
   };
 
   const delete_permission = (id_grupos_usuarios, id_modulos, id) => {
-    if (permission.includes(4)) {
       return (
         <Tooltip title="Eliminar">
           <IconButton
@@ -158,7 +151,6 @@ function Permissions(props) {
           </IconButton>
         </Tooltip>
       );
-    }
   };
 
   const dataToExcel = (data) => {
@@ -178,8 +170,8 @@ function Permissions(props) {
       <Paper elevation={3}>
         <Header
           search={true}
-          button={permission.includes(2) ? true : false}
-          exportButton={permission.includes(5) ? true : false}
+          button={true}
+          exportButton={true}
           dataToExcel={{ csvData: dataExcel, fileName: "Permisos" }}
           buttonText={"Gestionar"}
           buttonRoute={"/permissions/create"}

@@ -32,17 +32,11 @@ function UserGroups(props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (permission.includes(1)) {
       getGroups();
       setBreadcrumps([
         { name: "Configuración" },
         { name: "Grupos de usuarios" },
       ]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -133,8 +127,8 @@ function UserGroups(props) {
     <Paper elevation={3}>
       <Header
         search={true}
-        button={permission.includes(2) ? true : false}
-        exportButton={permission.includes(5) ? true : false}
+        button={true}
+        exportButton={true}
         dataToExcel={{
           csvData: dataExcel,
           fileName: "GruposUsuarios",
@@ -155,7 +149,6 @@ function UserGroups(props) {
                   <TableRow key={`row${index}`}>
                     <TableCell align="center">{row.nombre}</TableCell>
                     <TableCell align="center">
-                      {permission.includes(3) && (
                         <Tooltip title="Editar">
                           <IconButton
                             aria-label="edit"
@@ -164,10 +157,8 @@ function UserGroups(props) {
                             <FontAwesomeIcon icon={faEdit} size={"xs"} />
                           </IconButton>
                         </Tooltip>
-                      )}
                     </TableCell>
                     <TableCell align="center">
-                      {permission.includes(4) && (
                         <Tooltip title="Eliminar">
                           <IconButton
                             aria-label="delete"
@@ -176,7 +167,6 @@ function UserGroups(props) {
                             <HighlightOff />
                           </IconButton>
                         </Tooltip>
-                      )}
                     </TableCell>
                   </TableRow>
                 ))}

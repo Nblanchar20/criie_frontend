@@ -36,7 +36,7 @@ function FormModules(props) {
   const [form, setForm] = useState({ id_modulos: "", id_acciones: [] });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
+    
       getModules();
       getActions();
       if (props.match.params.id) {
@@ -53,8 +53,6 @@ function FormModules(props) {
           { name: "Crear" },
         ]);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

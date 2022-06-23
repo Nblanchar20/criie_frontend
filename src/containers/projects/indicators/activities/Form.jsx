@@ -41,7 +41,7 @@ function FormUser(props) {
   });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
+    
       getIndicators();
       if (props.match.url.includes('edit')) {
         getProject();
@@ -57,7 +57,6 @@ function FormUser(props) {
           { name: "Crear" },
         ]);
       }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

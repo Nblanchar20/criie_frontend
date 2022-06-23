@@ -40,15 +40,9 @@ function Modules(props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (permission.includes(1)) {
       getModules();
       getActions();
       setBreadcrumps([{ name: "Configuración" }, { name: "Módulos" }]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,8 +139,8 @@ function Modules(props) {
     <>
       <Paper elevation={0}>
         <Header
-          button={permission.includes(2) ? true : false}
-          exportButton={permission.includes(5) ? true : false}
+          button={true}
+          exportButton={true}
           dataToExcel={{ csvData: dataExcel, fileName: "Módulos" }}
           buttonRoute={"/modules/create"}
           tableName={"modules"}
@@ -181,7 +175,6 @@ function Modules(props) {
                         </Tooltip>
                       </TableCell>
                       <TableCell align="center">
-                        {permission.includes(3) && (
                           <Tooltip title="Editar">
                             <IconButton
                               aria-label="edit"
@@ -194,10 +187,8 @@ function Modules(props) {
                               <FontAwesomeIcon icon={faEdit} size={"xs"} />
                             </IconButton>
                           </Tooltip>
-                        )}
                       </TableCell>
                       <TableCell align="center">
-                        {permission.includes(4) && (
                           <Tooltip title="Eliminar">
                             <IconButton
                               aria-label="delete"
@@ -208,7 +199,6 @@ function Modules(props) {
                               <HighlightOff />
                             </IconButton>
                           </Tooltip>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}

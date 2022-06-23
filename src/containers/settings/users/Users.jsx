@@ -148,8 +148,8 @@ function Users(props) {
     <Paper elevation={3}>
       <Header
         search={true}
-        button={permission.includes(2) ? true : false}
-        exportButton={permission.includes(5) ? true : false}
+        button={true}
+        exportButton={true}
         dataToExcel={{ csvData: dataExcel, fileName: "Usuarios" }}
         buttonText={"Crear"}
         buttonRoute={"/users/create"}
@@ -174,7 +174,6 @@ function Users(props) {
                       {row.grupoUsuarios?.nombre}
                     </TableCell>
                     <TableCell align="center">
-                      {permission.includes(3) && (
                         <Tooltip title="Editar">
                           <IconButton
                             aria-label="edit"
@@ -183,10 +182,8 @@ function Users(props) {
                             <FontAwesomeIcon icon={faEdit} size={"xs"} />
                           </IconButton>
                         </Tooltip>
-                      )}
                     </TableCell>
                     <TableCell align="center">
-                      {permission.includes(4) && (
                         <Tooltip title="Eliminar">
                           <IconButton
                             aria-label="delete"
@@ -195,7 +192,6 @@ function Users(props) {
                             <DeleteIcon />
                           </IconButton>
                         </Tooltip>
-                      )}
                     </TableCell>
                   </TableRow>
                 ))}

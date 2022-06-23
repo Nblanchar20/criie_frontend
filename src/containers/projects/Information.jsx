@@ -44,7 +44,7 @@ function FormUser(props) {
   });
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
+    
       console.log(props.match.url.substring(0,14))
       getUserGroups();
         getProject();
@@ -52,8 +52,7 @@ function FormUser(props) {
           { name: "Proyecto", route: "/projects" },
           { name: "Información" },
         ]);
-      
-    }
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

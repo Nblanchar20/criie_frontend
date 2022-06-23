@@ -43,8 +43,7 @@ function FormUser(props) {
     alcance: "",
   });
 
-  useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
+  useEffect(() => {    
       getUserGroups();
       if (props.match.url.includes('edit')) {
         getProject();
@@ -60,7 +59,6 @@ function FormUser(props) {
           { name: "Crear" },
         ]);
       }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

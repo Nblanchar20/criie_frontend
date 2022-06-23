@@ -36,7 +36,6 @@ function FormParameters(props) {
   ]);
 
   useEffect(() => {
-    if (permission.includes(2) || permission.includes(3)) {
       if (props.match.params.id) {
         getParameters();
         setBreadcrumps([
@@ -51,8 +50,6 @@ function FormParameters(props) {
           { name: "Crear" },
         ]);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getParameters = async () => {
