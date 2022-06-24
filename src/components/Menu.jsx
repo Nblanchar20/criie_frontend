@@ -116,43 +116,12 @@ const Menu = (props) => {
                 </ListItem>
               </>
               <>
-                <ListItem button onClick={() => handleChange("panel2")}>
+                <ListItem button onClick={() => toLink("/projects")}>
                   <ListItemIcon>
                     <BarChart className={classes.icon} />
                   </ListItemIcon>
                   <ListItemText primary="Proyectos" />
                 </ListItem>
-                <Collapse
-                  in={selected === "panel2"}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/projects")}>
-                        <ListItemText inset primary="Lista Proyectos" />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/objectives/create")}>
-                        <ListItemText inset primary="Objetivos" />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/indicators/create")}>
-                        <ListItemText inset primary="Indicadores" />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/budgets/create")}>
-                        <ListItemText inset primary="Presupuesto" />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem button onClick={() => toLink("/deliverables/create")}>
-                        <ListItemText inset primary="Entregables" />
-                      </ListItem>
-                    </List>
-                </Collapse>
               </>
               <>
                 <ListItem button onClick={() => handleChange("panel1")}>

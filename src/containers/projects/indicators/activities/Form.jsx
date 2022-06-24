@@ -30,6 +30,7 @@ function FormUser(props) {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [indicator, setIndicator] = useState([]);
+  const [project, setProject] = useState([]);
   const [error, setError] = useState({});
   const [form, setForm] = useState({
     nombre: "",
@@ -40,9 +41,8 @@ function FormUser(props) {
     vp_estado_actividad:1
   });
 
-  useEffect(() => {
-    
-      getIndicators();
+  useEffect(() => {    
+      getProjects()
       if (props.match.url.includes('edit')) {
         getProject();
         setBreadcrumps([
@@ -78,11 +78,27 @@ function FormUser(props) {
     }
   };
 
-  const getIndicators = async () => {
+  const getProjects = async () => {
+    try {
+      const { data } = await axios.post(
+        `/project/getProjects`,
+        {},
+        {
+          headers: { "access-token": token },
+        }
+      );
+        setProject(data.projects);
+    } catch (error) {
+      history.push("/objectives");
+      window.location.reload();
+    }
+  };
+
+  const getIndicators = async (id) => {
     try {
       const { data } = await axios.post(
         `/indicator/getIndicators`,
-        {},
+        {"id_proyectos":id},
         {
           headers: { "access-token": token },
         }
@@ -101,6 +117,11 @@ function FormUser(props) {
       [event.target.name]: event.target.value,
     });
   };
+
+  const handleIndicators = (event)=>{
+    const id = event.target.value;     
+    getIndicators(id)
+  }
 
   const handleCancel = () => {
     history.push("/projects");
@@ -214,9 +235,34 @@ function FormUser(props) {
             <Grid container spacing={2}>
             <Grid item xs={12}>
                 <FormControl required fullWidth variant="outlined">
-                  <InputLabel id="projectsLabel">Indicadores</InputLabel>
+                  <InputLabel id="projectsLabel">Proyectos</InputLabel>
                   <Select
                     labelId="projectsLabel"
+                    label="Proyectos"
+                    onClick={handleIndicators}
+                    name="id_proyectos"
+                    className={classes.container__input_root}
+                  >
+                    <MenuItem value="" disabled>
+                      <em>Seleccione una opción</em>
+                    </MenuItem>
+                    {project
+                      .sort((a, b) => (a.nombre < b.nombre ? -1 : 1))
+                      .map((data) => {
+                        return (
+                          <MenuItem key={`group-${data.id}`} value={data.id}>
+                            {data.nombre}
+                          </MenuItem>
+                        );
+                      })}
+                  </Select>
+                </FormControl>
+              </Grid>
+            <Grid item xs={12}>
+                <FormControl required fullWidth variant="outlined">
+                  <InputLabel id="indicatorsLabel">Indicadores</InputLabel>
+                  <Select
+                    labelId="indicatorsLabel"
                     label="Indicadores"
                     value={form.id_indicadores}
                     onChange={handleInput}

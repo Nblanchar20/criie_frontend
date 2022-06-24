@@ -10,10 +10,6 @@ import {
   Paper,
   Divider,
   Typography,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
 } from "@material-ui/core";
 import { decrypt } from "../../utils/crypt";
 import Header from "../../components/Header";
@@ -23,8 +19,11 @@ import axios from "../../api";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import Modal from "../../components/modal";
-import Objectives from"./objectives/create"
+import Modal from "../../components/Modal";
+import Objectives from"./objectives/create";
+import Deliverables from"./deliverables/create";
+import Indicators from"./indicators/create";
+
 
 function FormUser(props) {
   const { userId, setBreadcrumps, groupId, permission, token } = props;
@@ -32,7 +31,8 @@ function FormUser(props) {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [modalObjective, setmodalObjective] = useState(false);
-  const [userGroup, setUserGroup] = useState([]);
+  const [modalDeliverable, setmodalDeliverable] = useState(false);
+  const [modalIndicator, setmodalIndicator] = useState(false);
   const [error, setError] = useState({});
   const [form, setForm] = useState({
     nombre: "",
@@ -41,10 +41,10 @@ function FormUser(props) {
     fecha_inicio_esperado: new Date(),
     fecha_fin_esperado: new Date(),
     alcance: "",
+    presupuesto:""
   });
 
-  useEffect(() => {    
-      getUserGroups();
+  useEffect(() => {
       if (props.match.url.includes('edit')) {
         getProject();
         setBreadcrumps([
@@ -75,27 +75,8 @@ function FormUser(props) {
         fecha_inicio_esperado: data.project?.fecha_inicio_esperado,
         fecha_fin_esperado: data.project?.fecha_fin_esperado,
         alcance: data.project?.alcance,
+        presupuesto: data.project?.presupuesto
       });
-    } catch (error) {
-      history.push("/users");
-      window.location.reload();
-    }
-  };
-
-  const getUserGroups = async () => {
-    try {
-      const { data } = await axios.post(
-        `/userGroup/getGroups`,
-        {},
-        {
-          headers: { "access-token": token },
-        }
-      );
-      if (groupId === 1) {
-        setUserGroup(data.groups);
-      } else {
-        setUserGroup(data.groups.filter((item) => item.id !== 1));
-      }
     } catch (error) {
       history.push("/users");
       window.location.reload();
@@ -225,7 +206,20 @@ function FormUser(props) {
 
   return (
     <Paper elevation={0}>
-      <Header search={false} buttonText={"Volver"} buttonRoute={"/users"} />
+      <Header search={false} buttonText={"Volver"} buttonRoute={"/users"}
+
+      ObjectiveButton={props.match.url.includes('edit') ? true:false}
+      modalObjective={modalObjective}
+      setmodalObjective={setmodalObjective}
+
+      DeliverableButton={props.match.url.includes('edit') ? true:false}
+      modalDeliverable={modalDeliverable}
+      setmodalDeliverable={setmodalDeliverable}
+
+      IndicatorButton={props.match.url.includes('edit') ? true:false}
+      modalIndicator={modalIndicator}
+      setmodalIndicator={setmodalIndicator}
+       />
       <Divider />
       <div className={classes.paper}>
         <div className={classes.container}>
@@ -303,7 +297,22 @@ function FormUser(props) {
               /> 
               </LocalizationProvider>              
               </Grid>
-
+              <Grid item xs={12} sm={12}>
+              <TextField
+                  required
+                  fullWidth
+                  label="Presupuesto"
+                  name="presupuesto"
+                  value={form.presupuesto}
+                  variant="outlined"
+                  onChange={handleInput}
+                  InputProps={{
+                    classes: {
+                      root: classes.container__input_root,
+                    },
+                  }}
+                />
+                  </Grid>
               <Grid item xs={12} sm={12}>
                 <TextField
                   required
@@ -346,29 +355,45 @@ function FormUser(props) {
         </div>
         {props.match.url.includes('edit') ? 
       <div className={classes.containerButton}>
-              <Button                
-                color="primary"
-                variant="contained"
-                className={classes.button}
-                onClick={()=>setmodalObjective(!modalObjective)}
-              >
-                Objetivos
-              </Button>              
-      {/* Modal Objetivos */}
-      <Modal
-        estado={modalObjective}
-        cambiarEstado={setmodalObjective}
-        titulo={"Agregar objetivo "}
-        mostrarHeader={true}
+          {/* Modal Indicadores */}
+          <Modal
+            estado={modalIndicator}
+            cambiarEstado={setmodalIndicator}
+            titulo={"Agregar Indicadores "}
+            mostrarHeader={true}
 
-      >
-        <Objectives
-        id={decrypt(props.match.params.id)}
-        token={token}
-        cambiarEstado={setmodalObjective}
-        estado={modalObjective}
-        />
-      </Modal>
+          >
+            <Indicators
+            id={decrypt(props.match.params.id)}
+            token={token}
+            />
+          </Modal>
+          {/* Modal Objetivos */}
+          <Modal
+            estado={modalObjective}
+            cambiarEstado={setmodalObjective}
+            titulo={"Agregar objetivo "}
+            mostrarHeader={true}
+
+          >
+            <Objectives
+            id={decrypt(props.match.params.id)}
+            token={token}
+            />
+          </Modal>
+          {/* Modal Entregables */}
+          <Modal
+            estado={modalDeliverable}
+            cambiarEstado={setmodalDeliverable}
+            titulo={"Agregar Entregables "}
+            mostrarHeader={true}
+
+          >
+            <Deliverables
+            id={decrypt(props.match.params.id)}
+            token={token}
+            />
+          </Modal>
       </div>
       :null     
       }        

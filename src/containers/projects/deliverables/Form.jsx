@@ -117,7 +117,6 @@ function FormUser(props) {
           .then((res) => {
             setLoading(false);
             if (res.data.deliverable) {
-              history.push("/deliverables/create");
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",

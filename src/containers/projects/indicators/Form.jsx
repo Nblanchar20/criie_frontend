@@ -33,8 +33,7 @@ function FormUser(props) {
     id_proyectos:"",
   });
 
-  useEffect(() => {
-    
+  useEffect(() => {    
       getProjects();
       if (props.match.params.id) {
         getIndicator();
@@ -94,6 +93,7 @@ function FormUser(props) {
       ...form,
       [event.target.name]: event.target.value,
     });
+    console.log(form.id_proyectos)
   };
 
   const handleCancel = () => {

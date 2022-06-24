@@ -38,14 +38,10 @@ function Users(props) {
   const [dataExcel, setDataExcel] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (permission.includes(1)) {
-      logUsers();
-      setBreadcrumps([{ name: "Log" }]);
-    } else {
-      history.push("/");
-      window.location.reload();
-    }
+  useEffect(() => {   
+      getUsers();
+      setBreadcrumps([{ name: "Configuración" }, { name: "Usuarios" }]);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -53,20 +49,20 @@ function Users(props) {
     dataToExcel(filtro);
   }, [filtro]);
 
-  const logUsers = async () => {
+  const getUsers = async () => {
     const { data } = await axios.post(
-      `/log/getLog`,
+      `/user/getUsers`,
       {},
       {
         headers: { "access-token": token },
       }
     );
     if (groupId === 1) {
-      setUsers(data?.log);
-      setFiltro(data?.log);
-      dataToExcel(data?.log);
+      setUsers(data?.users);
+      setFiltro(data?.users);
+      dataToExcel(data?.users);
     } else {
-      const usersFiltered = data.log.filter(
+      const usersFiltered = data.users.filter(
         (item) => item.id_grupos_usuarios !== 1
       );
       setUsers(usersFiltered);
@@ -84,7 +80,7 @@ function Users(props) {
         history.push(`/users/edit/${encrypt(id)}`);
         break;
       case "create":
-        history.push(`Log`);
+        history.push(`/users/create`);
         break;
       default:
         break;
@@ -137,11 +133,12 @@ function Users(props) {
     // eslint-disable-next-line array-callback-return
     const arrayExcel = data?.map((item) => {
       return {
-        Registro: item.registro || "",
-        Usuario: item.usuario?.email,
-        Modulo: item.modulo?.nombre,
-        IP: item.ip,
-        Fecha: item.fecha || "",
+        Documento: item.documento || "",
+        Nombres: item.nombres,
+        Apellidos: item.apellidos,
+        "Correo electrónico": item.email,
+        Teléfono: item.telefono || "",
+        "Grupo de usuario": item.grupoUsuarios?.nombre,
       };
     });
     setDataExcel(arrayExcel);
@@ -151,8 +148,11 @@ function Users(props) {
     <Paper elevation={3}>
       <Header
         search={true}
-        exportButton={permission.includes(5) ? true : false}
-        dataToExcel={{ csvData: dataExcel, fileName: "Log" }}
+        button={true}
+        exportButton={true}
+        dataToExcel={{ csvData: dataExcel, fileName: "Usuarios" }}
+        buttonText={"Crear"}
+        buttonRoute={"/users/create"}
         tableName={"users"}
         items={users}
         setItems={setFiltro}
@@ -165,11 +165,34 @@ function Users(props) {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => (
                   <TableRow key={`row${index}`}>
-                    <TableCell align="center">{row.registro}</TableCell>
-                    <TableCell align="center">{row.usuario?.email}</TableCell>
-                    <TableCell align="center">{row.modulo?.nombre}</TableCell>
-                    <TableCell align="center">{row.ip}</TableCell>
-                    <TableCell align="center">{row.fecha}</TableCell>
+                    <TableCell align="center">{row.documento}</TableCell>
+                    <TableCell align="center">{row.nombres}</TableCell>
+                    <TableCell align="center">{row.apellidos}</TableCell>
+                    <TableCell align="center">{row.email}</TableCell>
+                    <TableCell align="center">{row.telefono}</TableCell>
+                    <TableCell align="center">
+                      {row.grupoUsuarios?.nombre}
+                    </TableCell>
+                    <TableCell align="center">
+                        <Tooltip title="Editar">
+                          <IconButton
+                            aria-label="edit"
+                            onClick={(e) => handleClick(e, row.id, "edit")}
+                          >
+                            <FontAwesomeIcon icon={faEdit} size={"xs"} />
+                          </IconButton>
+                        </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                        <Tooltip title="Eliminar">
+                          <IconButton
+                            aria-label="delete"
+                            onClick={(e) => handleClick(e, row.id, "delete")}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                    </TableCell>
                   </TableRow>
                 ))}
             </>
@@ -187,37 +210,50 @@ function Users(props) {
 
 const columns = [
   {
-    id: "registro",
-    label: "Registro",
+    id: "document",
+    label: "Documento",
     minWidth: 100,
     align: "center",
   },
 
   {
-    id: "usuario",
-    label: "Usuario",
+    id: "name",
+    label: "Nombres",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "modulo",
-    label: "Modulo",
+    id: "lastname",
+    label: "Apellidos",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "ip",
-    label: "IP",
+    id: "email",
+    label: "Correo electrónico",
     minWidth: 100,
     align: "center",
   },
   {
-    id: "fecha",
-    label: "Fecha",
+    id: "tel",
+    label: "Teléfono",
     minWidth: 100,
     align: "center",
     super: true,
-  }
+  },
+  {
+    id: "group",
+    label: "Grupo de usuario",
+    minWidth: 100,
+    align: "center",
+  },
+  {
+    id: "actions",
+    label: "",
+    minWidth: 10,
+    align: "center",
+    colSpan: 2,
+  },
 ];
 
 const mapStateToProps = (state) => {

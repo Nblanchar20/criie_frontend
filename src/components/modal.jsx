@@ -46,7 +46,7 @@ const Overlay = styled.div`
 	background:rgba(0,0,0,0.5);
 	padding: 40px;
 	display: flex;
-	align-items: ${props => props.posicionModal ? props.posicionModal : 'center'};
+	align-items: ${props => props.posicionModal ? props.posicionModal : 'Center'};
 	justify-content: center;
 `;
 

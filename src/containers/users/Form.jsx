@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
-import { setBreadcrumps } from "../../../actions";
+import { setBreadcrumps } from "../../actions";
 import {
   makeStyles,
   TextField,
@@ -15,11 +15,11 @@ import {
   InputLabel,
   Select,
 } from "@material-ui/core";
-import { decrypt } from "../../../utils/crypt";
-import Header from "../../../components/Header";
+import { decrypt } from "../../utils/crypt";
+import Header from "../../components/Header";
 import Swal from "sweetalert2";
-import Backdrop from "../../../components/Backdrop";
-import axios from "../../../api";
+import Backdrop from "../../components/Backdrop";
+import axios from "../../api";
 
 function FormUser(props) {
   const { userId, setBreadcrumps, groupId, permission, token } = props;

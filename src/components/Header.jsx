@@ -8,6 +8,7 @@ import ReloadIcon from "@material-ui/icons/CachedRounded";
 import EditIcon from "@material-ui/icons/Edit";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ExportExcel from "./ExportExcel";
+import { useState } from "react";
 
 function Header(props) {
   const {
@@ -32,6 +33,15 @@ function Header(props) {
     addButton = false,
     addClick,
     token,
+    ObjectiveButton= false,
+    modalObjective,
+    setmodalObjective,
+    DeliverableButton= false,
+    modalDeliverable,
+    setmodalDeliverable,
+    IndicatorButton= false,
+    modalIndicator,
+    setmodalIndicator,
   } = props;
   const classes = useStyles({ backButton });
   const history = useHistory();
@@ -140,9 +150,45 @@ function Header(props) {
               </Button>
             </Tooltip>
           )}
-        </Grid>
+          {ObjectiveButton && (
+            <>
+            <Tooltip title="Crear">
+            <Button
+                color="primary"
+                variant="contained"
+                className={classes.button}
+                onClick={()=>setmodalObjective(!modalObjective)}
+              >
+                Objetivo
+            </Button>
+            </Tooltip>
+            </>              
+                        
+          )}
+          {DeliverableButton && (
+              <Button
+                color="primary"
+                variant="contained"
+                className={classes.button}
+                onClick={()=>setmodalDeliverable(!modalDeliverable)}
+              >
+                Entregables
+              </Button>        
+          )}
+          {IndicatorButton && (
+              <Button
+                color="primary"
+                variant="contained"
+                className={classes.button}
+                onClick={()=>setmodalIndicator(!modalIndicator)}
+              >
+                Indicadores
+              </Button>       
+          )}          
+        </Grid>        
       </Grid>
     </div>
+    
   );
 }
 
