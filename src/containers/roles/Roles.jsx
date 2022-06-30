@@ -21,10 +21,8 @@ import axios from "../../api";
 import Swal from "sweetalert2";
 import Backdrop from "../../components/Backdrop";
 import {FindInPageOutlined } from "@material-ui/icons";
-import Modal from "../../components/Modal";
-import ProjectModal from "./Modal"
 
-function Projects(props) {
+function Roles(props) {
   const {
     userId,
     page,
@@ -36,18 +34,15 @@ function Projects(props) {
   } = props;
   const history = useHistory();
   const theme = useTheme();
-  const [projects, setProjects] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [filtro, setFiltro] = useState([]);
   const [dataExcel, setDataExcel] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [idproject, setIdProject] = useState(null);
-
 
   useEffect(() => {
     
-      getProjects();
-      setBreadcrumps([{ name: "Lista de Proyectos" }]);
+      getRoles();
+      setBreadcrumps([{ name: "Lista de Roles" }]);
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -56,27 +51,28 @@ function Projects(props) {
     dataToExcel(filtro);
   }, [filtro]);
 
-  const getProjects = async () => {
+  const getRoles = async () => {
     const { data } = await axios.post(
-      `/project/getProjects`,
+      `/role/getRoles`,
       {},
       {
         headers: { "access-token": token },
       }
     );
+    console.log(data)
     if (groupId === 1) {
-      setProjects(data?.projects);
-      setFiltro(data?.projects);
-      dataToExcel(data?.projects);
+      setRoles(data?.roles);
+      setFiltro(data?.roles);
+      dataToExcel(data?.roles);
       
       
     } else {
-      const projectsFiltered = data.projects.filter(
+      const rolesFiltered = data.roles.filter(
         (item) => item.id_grupos_usuarios !== 1
       );
-      setProjects(projectsFiltered);
-      setFiltro(projectsFiltered);
-      dataToExcel(projectsFiltered);
+      setRoles(rolesFiltered);
+      setFiltro(rolesFiltered);
+      dataToExcel(rolesFiltered);
     }
   };
 
@@ -86,13 +82,13 @@ function Projects(props) {
         modalDelete(id);
         break;
       case "edit":
-        history.push(`/projects/edit/${encrypt(id)}`);
+        history.push(`/roles/edit/${encrypt(id)}`);
         break;
       case "create":
-        history.push(`/projects/create`);
+        history.push(`/roles/create`);
         break;
         case "view":
-          history.push(`/projects/information/${encrypt(id)}`);
+          history.push(`/roles/information/${encrypt(id)}`);
           break;
       default:
         break;
@@ -122,7 +118,7 @@ function Projects(props) {
     });
     console.log(data)
     if (data.projectId) {
-      getProjects()
+      setFiltro(roles.filter((item) => item.id !== id));
       setLoading(false);
       Swal.fire({
         text: "Eliminado exitosamente.",
@@ -161,11 +157,12 @@ function Projects(props) {
       <Header
         search={true}
         button={true}
+        exportButton={true}
         dataToExcel={{ csvData: dataExcel, fileName: "Proyectos" }}
         buttonText={"Crear"}
-        buttonRoute={"/projects/create"}
-        tableName={"projects"}
-        items={projects}
+        buttonRoute={"/roles/create"}
+        tableName={"roles"}
+        items={roles}
         setItems={setFiltro}
       />
       <Table columns={columns} rows={filtro}>
@@ -177,18 +174,11 @@ function Projects(props) {
                 .map((row, index) => (
                   <TableRow key={`row${index}`}>
                     <TableCell align="center">{row.nombre}</TableCell>
-                    <TableCell align="center">{row.fecha_inicio}</TableCell>
-                    <TableCell align="center">{row.fecha_fin}</TableCell>
-                    <TableCell align="center">{row.fecha_inicio_esperado}</TableCell>
-                    <TableCell align="center">{row.fecha_fin_esperado}</TableCell>
                     <TableCell align="center">
                         <Tooltip title="Ver mas">
                           <IconButton
                             aria-label="edit"
-                            onClick={() => {
-                              setModal(!modal)
-                              setIdProject(row.id)
-                            }}
+                            onClick={(e) => handleClick(e, row.id, "view")}
                           >
                             <FindInPageOutlined />
                           </IconButton>
@@ -224,16 +214,6 @@ function Projects(props) {
           )}
         </TableBody>
       </Table>
-      <Modal
-      estado={modal}
-      cambiarEstado={setModal}
-      mostrarHeader={false}
-      project='850px'
-      >
-        <ProjectModal
-        id={idproject}
-        token={token}/>
-      </Modal>
       <Backdrop loading={loading} />
     </Paper>
   );
@@ -244,30 +224,6 @@ const columns = [
   {
     id: "name",
     label: "Nombre",
-    minWidth: 100,
-    align: "center",
-  },
-  {
-    id: "startDate",
-    label: "Fecha Inicio",
-    minWidth: 100,
-    align: "center",
-  },
-  {
-    id: "endDate",
-    label: "Fecha Fin",
-    minWidth: 100,
-    align: "center",
-  },
-  {
-    id: "expectedStartDate",
-    label: "Fecha Inicio Esperada",
-    minWidth: 100,
-    align: "center",
-  },
-  {
-    id: "expectedEndDate",
-    label: "Fecha Finalización Esperada",
     minWidth: 100,
     align: "center",
   },
@@ -303,4 +259,4 @@ const mapDispatchToProps = {
   setBreadcrumps,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Projects);
+export default connect(mapStateToProps, mapDispatchToProps)(Roles);

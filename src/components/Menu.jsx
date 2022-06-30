@@ -122,8 +122,14 @@ const Menu = (props) => {
                   </ListItemIcon>
                   <ListItemText primary="Proyectos" />
                 </ListItem>
+                <ListItem button onClick={() => toLink("/roles")}>
+                  <ListItemIcon>
+                    <BarChart className={classes.icon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Roles" />
+                </ListItem>
               </>
-              <>
+              {/* <>
                 <ListItem button onClick={() => handleChange("panel1")}>
                   <ListItemIcon>
                     <Settings className={classes.icon} />
@@ -166,7 +172,7 @@ const Menu = (props) => {
                       </ListItem>
                     </List>
                 </Collapse>
-              </>
+              </> */}
           </List>
         </div>
       </Drawer>

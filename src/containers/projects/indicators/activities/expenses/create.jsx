@@ -14,27 +14,28 @@ import {
     InputLabel,
     Select,
   } from "@material-ui/core";
-  import { encrypt } from "../../../utils/crypt";
-  import Header from "../../../components/Header";
   import Swal from "sweetalert2";
-  import Backdrop from "../../../components/Backdrop";
-  import axios from "../../../api";
+  import axios from "../../../../../api";  
+  import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+  import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+  import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const Create = ({
     id,
     token,
-    metodo = null
+    metodo
 }) => {
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
+  const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const [form, setForm] = useState({
-    nombre: "",
-    descripcion:"",
-    id_proyectos:id,
+    gasto: "",
+    descripcion: "",
+    fecha: new Date(),
+    id_actividades:id,
   });
 
   const handleSubmit = (e) => {
@@ -42,7 +43,7 @@ const Create = ({
     setLoading(true);
         axios
           .post(
-            `/objective/`,
+            `/expense/`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,13 +51,14 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
+            if (res.data.expense) {
+              metodo()
                 setForm(
                     {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
+                      gasto: "",
+                      descripcion: "",
+                      fecha: new Date(),
+                      id_actividades:id,
                       }
                 )          
               Swal.fire({
@@ -88,19 +90,19 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getActivity();
       }, []);
 
-      const getProjects = async () => {
+      const getActivity = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/activity/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setActivity(data?.activity);
         } catch (error) {
           history.push("/objectives");
           window.location.reload();
@@ -114,22 +116,29 @@ const Create = ({
         });
       };
 
+      const handleChangeInit = (newValue) => {
+        setForm({
+          ...form,
+          fecha: newValue
+        });
+      };
+
       
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {activity.nombre}
             </Typography>
             <Divider />
             <form className={classes.root} onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={12}>
+            <Grid item xs={12} sm={12}>
                 <TextField
                   required
                   fullWidth
-                  label="Nombre"
-                  name="nombre"
-                  value={form.nombre}
+                  label="Valor del Gasto"
+                  name="gasto"
+                  value={form.gasto}
                   variant="outlined"
                   onChange={handleInput}
                   InputProps={{
@@ -143,11 +152,11 @@ const Create = ({
                 <TextField
                   required
                   fullWidth
-                  label="Descripción"
+                  label="descripcion"
                   name="descripcion"
-                  value={form.descripcion}
                   multiline
-                  rows ={3}
+                  value={form.descripcion}
+                  rows ={4}
                   variant="outlined"
                   onChange={handleInput}
                   InputProps={{
@@ -156,8 +165,20 @@ const Create = ({
                     },
                   }}
                 />
-              </Grid>              
-                            
+              </Grid>
+              <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DesktopDatePicker
+                required
+                fullWidth
+                label="Fecha Gasto"
+                inputFormat="dd/MM/yyyy"
+                value={form.fecha}
+                onChange={handleChangeInit}
+                renderInput={(params) => <TextField {...params} />}
+              /> 
+              </LocalizationProvider>              
+              </Grid>       
             </Grid>
             <div className={classes.containerButton}>
               <Button

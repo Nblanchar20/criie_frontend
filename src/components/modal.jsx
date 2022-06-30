@@ -8,13 +8,14 @@ const Modal = ({
 	titulo = 'Alerta',
 	mostrarHeader,
 	posicionModal,
+	project,
 	padding,
 }) => {
 	return (
 		<>
 			{estado && 
 				<Overlay posicionModal={posicionModal}>
-					<ContenedorModal padding={padding}>
+					<ContenedorModal padding={padding} project={project}>
 						{mostrarHeader && 
 							<EncabezadoModal>
 								<h3>{titulo}</h3>
@@ -51,8 +52,9 @@ const Overlay = styled.div`
 `;
 
 const ContenedorModal = styled.div`
-	width: 500px;
+	width:${props => props.project ? props.project : '500px'} ;
 	min-height: 200px;
+	max-height: 600px;
 	background: #fff;
 	position: relative;
 	border-radius: 5px;

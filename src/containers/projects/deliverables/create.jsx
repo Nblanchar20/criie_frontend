@@ -20,6 +20,7 @@ import {
 const Create = ({
     id,
     token,
+    metodo
 }) => {
 
     
@@ -47,6 +48,7 @@ const Create = ({
           .then((res) => {
             setLoading(false);
             if (res.data.deliverable) {
+              metodo()
                 setForm(
                     {
                         nombre: "",

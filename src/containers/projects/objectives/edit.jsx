@@ -20,7 +20,7 @@ import {
   import Backdrop from "../../../components/Backdrop";
   import axios from "../../../api";
 
-const Create = ({
+const Edit = ({
     id,
     token,
     metodo = null
@@ -28,21 +28,21 @@ const Create = ({
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
+  const [objective, setObjective] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const [form, setForm] = useState({
     nombre: "",
     descripcion:"",
-    id_proyectos:id,
+    id_proyectos:"",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
         axios
-          .post(
-            `/objective/`,
+          .put(
+            `/objective/${id}`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,15 +50,9 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
-                setForm(
-                    {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
-                      }
-                )          
+            console.log(res.data)
+            if (res.data.updated) {
+                metodo()         
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -88,22 +82,27 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getObjective();
       }, []);
 
-      const getProjects = async () => {
+      const getObjective = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/objective/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setObjective(data.objective);
+          setForm({
+            nombre:data.objective.nombre,
+            descripcion:data.objective.descripcion,
+            id_proyectos:data.objective.id_proyectos
+          })
         } catch (error) {
-          history.push("/objectives");
-          window.location.reload();
+          //history.push("/objectives");
+          //window.location.reload();
         }
       };
 
@@ -118,7 +117,7 @@ const Create = ({
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {objective.nombre}
             </Typography>
             <Divider />
             <form className={classes.root} onSubmit={handleSubmit}>
@@ -166,7 +165,7 @@ const Create = ({
                 className={classes.button}
                 type="submit"
               >
-                Agregar
+                Editar
               </Button>
             </div>
           </form>
@@ -174,7 +173,7 @@ const Create = ({
 	);
 }
  
-export default Create;
+export default Edit;
 
 const useStyles = makeStyles((theme) => ({
     root: {

@@ -19,6 +19,9 @@ import UsersForm from "../containers/users/Form";
 import Projects from "../containers/projects/Projects";
 import ProjectsForm from "../containers/projects/Form";
 import ProjectsInfomation from "../containers/projects/Information";
+import Roles from "../containers/roles/Roles";
+import RolesForm from "../containers/roles/Form";
+import UsersRolesForm from "../containers/projects/userRole/Form";
 import ObjectivesForm from "../containers/projects/objectives/Form";
 import DeliverablesForm from "../containers/projects/deliverables/Form";
 import IndicatorsForm from "../containers/projects/indicators/Form";
@@ -32,6 +35,7 @@ import EditProfile from "../containers/accounts/EditProfile";
 import ChangePasswordProfile from "../containers/accounts/ChangePassProfile";
 import ForgetPassword from "../containers/accounts/ForgetPass";
 import ChangePassword from "../containers/accounts/ChangePass";
+import { encrypt } from "../utils/crypt";
 
 
 const SwitchApp = () => {
@@ -41,7 +45,7 @@ const SwitchApp = () => {
     <BrowserRouter>
       <Switch>
         <Route exact path="/">
-          <Redirect to="sign-in" />
+          <Redirect to="/sign-in" />
         </Route>
         <Switch location={location} key={location.pathname}>
           <Route path="/sign-in" component={SignIn} />
@@ -75,21 +79,28 @@ const SwitchApp = () => {
             <Route path="/users/create" component={UsersForm} />
             <Route path="/users/edit/:id" component={UsersForm} />
             
-            <Route path="/projects" exact component={Projects} />
+            <Route path="/projects" exact component={Projects} />            
             <Route path="/projects/create" component={ProjectsForm} />
-            <Route path="/projects/edit/:id" component={ProjectsForm} />
+            <Route path="/projects/edit/:id" component={ProjectsInfomation} />
             <Route path="/projects/information/:id" component={ProjectsInfomation} />
-            
-            <Route path="/objectives/create" component={ObjectivesForm} />
-            <Route path="/objectives/edit/:id" component={ObjectivesForm} />
 
-            <Route path="/deliverables/create" component={DeliverablesForm} />
+            <Route path="/roles" exact component={Roles} />
+            <Route path="/roles/create" component={RolesForm} />
+            <Route path="/roles/edit/:id" component={RolesForm} />
+            
+            <Route path="/objectives/create/:id" component={ObjectivesForm} />
+            <Route path="/objectives/edit/:id" component={ObjectivesForm} />
+            
+            <Route path="/usersroles/create" component={UsersRolesForm} />
+            <Route path="/usersroles/edit/:id" component={UsersRolesForm} />
+
+            <Route path="/deliverables/create/:id" component={DeliverablesForm} />
             <Route path="/deliverables/edit/:id" component={DeliverablesForm} />
             
-            <Route path="/indicators/create" component={IndicatorsForm} />
+            <Route path="/indicators/create/:id" component={IndicatorsForm} />
             <Route path="/indicators/edit/:id" component={IndicatorsForm} />
 
-            <Route path="/activities/create" component={ActivitiesForm} />
+            <Route path="/activities/create/:id" component={ActivitiesForm} />
             <Route path="/activities/edit/:id" component={ActivitiesForm} />
             
             <Route path="/expenses/create" component={ExpensesForm} />

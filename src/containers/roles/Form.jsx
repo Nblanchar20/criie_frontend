@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
-import { setBreadcrumps } from "../../../actions";
+import { setBreadcrumps } from "../../actions";
 import {
   makeStyles,
   TextField,
@@ -9,111 +9,63 @@ import {
   Grid,
   Paper,
   Divider,
-  Typography,  
-  TableBody,
-  TableCell,
-  TableRow,
-  Tooltip,
-  IconButton,
+  Typography,
 } from "@material-ui/core";
-import { decrypt,encrypt } from "../../../utils/crypt";
-import Header from "../../../components/Header";
+import { decrypt } from "../../utils/crypt";
+import Header from "../../components/Header";
 import Swal from "sweetalert2";
-import Backdrop from "../../../components/Backdrop";
-import axios from "../../../api";
-import Table from "../../../components/Table";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit } from "@fortawesome/free-regular-svg-icons";
-import DeleteIcon from "@material-ui/icons/HighlightOff";
+import Backdrop from "../../components/Backdrop";
+import axios from "../../api";
+import Respansabilities from "./responsabilities/create";
+import Modal from "../../components/Modal";
+
 
 function FormUser(props) {
   const { userId, setBreadcrumps, groupId, permission, token } = props;
   const classes = useStyles();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const [project, setProject] = useState([]);
-  const [filtro, setFiltro] = useState([]);
+  const [modalResponsability, setmodalResponsability] = useState(false);
   const [error, setError] = useState({});
-  const id=decrypt(props.match.params.id);
   const [form, setForm] = useState({
     nombre: "",
-    id_proyectos:id,
   });
 
   useEffect(() => {
-    
-      getProject();
-      getIndicators();      
-      setBreadcrumps([
-        { name: "Proyecto", route: "/projects" },
-        { name: "Indicadores"},
-      ]);
       if (props.match.url.includes('edit')) {
-        getDeliverable();
+        getRole();
+        setBreadcrumps([
+          { name: "Configuración" },
+          { name: "Rol", route: "/roles" },
+          { name: "Editar" },
+        ]);
+      } else {
+        setBreadcrumps([
+          { name: "Configuración" },
+          { name: "Rol", route: "/roles" },
+          { name: "Crear" },
+        ]);
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getIndicators = async () => {
+  const getRole = async () => {
     try {
-        const { data } = await axios.post(
-          `/indicator/getIndicators`,
-          {"id_proyectos":id},
-          {
-            headers: { "access-token": token },
-          }
-        );
-          setFiltro(data.indicators);
-      } catch (error) {
-        history.push(`/projects`);
-        window.location.reload();
-      }
-    };
-
-  const getDeliverable = async () => {
-    try {
-      const { data } = await axios.get(`/deliverable/${id}`, {
+      const id = decrypt(props.match.params.id);
+      const { data } = await axios.get(`/role/${id}`, {
         headers: { "access-token": token },
       });
-      setForm({
-        nombre: data.deliverable?.nombre,
-        id_proyectos:data.deliverable?.id_proyectos,
+      setForm({        
+        nombre: data.role?.nombre
       });
     } catch (error) {
-      history.push("/objectives");
+      history.push("/users");
       window.location.reload();
-    }
-  };
-
-  const getProject = async () => {
-    try {
-      const { data } = await axios.get(`/project/${id}`, {
-        headers: { "access-token": token },
-      });
-        setProject(data.project);
-    } catch (error) {
-      history.push(`/projects`)
-      window.location.reload();
-    }
-  };
-
-  const handleClick = (e, id, action) => {
-    switch (action) {
-      case "delete":
-        //modalDelete(id);
-        break;
-      case "edit":
-        //history.push(`/users/edit/${encrypt(id)}`);
-        break;
-      case "create":
-        //history.push(`/users/create`);
-        break;
-      default:
-        break;
     }
   };
 
   const handleInput = (event) => {
+    
     setForm({
       ...form,
       [event.target.name]: event.target.value,
@@ -121,16 +73,17 @@ function FormUser(props) {
   };
 
   const handleCancel = () => {
-    history.push("/objectives");
+    history.push("/roles");
   };
 
   const handleSubmit = (e) => {
+    console.log(form)
     e.preventDefault();
     setLoading(true);
-      if (!props.match.url.includes('edit')) {
+      if (!props.match.params.id) {
         axios
           .post(
-            `/indicator/`,
+            `/role/`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -138,12 +91,8 @@ function FormUser(props) {
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.indicator) {
-              getIndicators();
-              setForm({
-                nombre: "",
-                id_proyectos:id,
-              })
+            if (res.data.role) {
+              history.push("/roles");
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -153,7 +102,7 @@ function FormUser(props) {
             } else {
               Swal.fire({
                 icon: "error",
-                text: res.data.message,
+                text: res.data.userCreated.message,
                 showConfirmButton: false,
                 timer: 3000,
               });
@@ -169,18 +118,19 @@ function FormUser(props) {
             });
           });
       } else {
+        const id = decrypt(props.match.params.id);
         axios
-          .put(
-            `/user/${id}`,
-            { ...form, userId },
+          .post(
+            `/role/updateRole/${id}`,
+            { ...form},
             {
               headers: { "access-token": token },
             }
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.userUpdated.success) {
-              history.push("/users");
+            if (res.data.updated) {
+              history.push("/roles");
               Swal.fire({
                 icon: "success",
                 text: "Editado exitosamente.",
@@ -205,21 +155,23 @@ function FormUser(props) {
               timer: 3000,
             });
           });
-      }    
+      }
+    
   };
+
 
   return (
     <Paper elevation={0}>
-      <Header search={false}      
-      button={false} 
-      buttonText={"Indicadores"}
-      buttonRoute={`/indicators/create/${encrypt(id)}`}
-      />
+      <Header search={false} buttonText={"Volver"} buttonRoute={"/users"}
+      ResponsabilityButton={true}
+      modalResponsability={modalResponsability}
+      setmodalResponsability={setmodalResponsability}
+       />
       <Divider />
       <div className={classes.paper}>
         <div className={classes.container}>
           <Typography component="h1" variant="h5">
-            {project.nombre} 
+            {props.match.params.id ? "Editar" : "Crear"} Rol
           </Typography>
           <form className={classes.root} onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -238,17 +190,16 @@ function FormUser(props) {
                     },
                   }}
                 />
-              </Grid>           
-                            
+              </Grid>
             </Grid>
             <div className={classes.containerButton}>
-              <Button
+              <Button                
                 color="primary"
                 variant="contained"
                 className={classes.button}
                 type="submit"
               >
-                Agregar
+                Guardar
               </Button>
               <Button
                 color="primary"
@@ -258,71 +209,29 @@ function FormUser(props) {
               >
                 Cancelar
               </Button>
-            </div>
-          </form>
-        </div>
+            </div>              
+          </form>          
+        </div>                
       </div>
-      <Typography component="h1" variant="h5" align="center">
-            Lista Objetivos
-      </Typography>
-      <Table columns={columns} rows={filtro}>
-        <TableBody>
-          {filtro?.length > 0 ? (
-            <>
-              {filtro
-                .map((row, index) => (
-                  <TableRow key={`row${index}`}>
-                    <TableCell align="center">{row.nombre}</TableCell>
-                    <TableCell align="center">
-                        <Tooltip title="Editar">
-                          <IconButton
-                            aria-label="edit"
-                            onClick={(e) => handleClick(e, row.id, "edit")}
-                          >
-                            <FontAwesomeIcon icon={faEdit} size={"xs"} />
-                          </IconButton>
-                        </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                        <Tooltip title="Eliminar">
-                          <IconButton
-                            aria-label="delete"
-                            onClick={(e) => handleClick(e, row.id, "delete")}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </>
-          ) : (
-            <TableCell align="center" colSpan="8">
-              No hay datos registrados
-            </TableCell>
-          )}
-        </TableBody>
-      </Table>
+      {props.match.url.includes('edit') ?
+        <Modal
+          estado={modalResponsability}
+          cambiarEstado={setmodalResponsability}
+          titulo={"Agregar Responsabilidad "}
+          mostrarHeader={true}
+
+        >
+          <Respansabilities
+          id={decrypt(props.match.params.id)}
+          token={token}
+          />
+        </Modal>:
+        null
+      }      
       <Backdrop loading={loading} />
     </Paper>
   );
 }
-
-const columns = [
-  {
-    id: "name",
-    label: "Nombre",
-    minWidth: 100,
-    align: "center",
-  },
-  {
-    id: "actions",
-    label: "",
-    minWidth: 10,
-    align: "center",
-    colSpan: 2,
-  },
-];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -363,7 +272,7 @@ const useStyles = makeStyles((theme) => ({
 const mapStateToProps = (state) => {
   return {
     userId: state.user.id,
-    groupId: state.user.id_grupos_usuarios,
+    groupId: state.user.id_grupoUsuarios,
     token: state.token,
     permission: (state.permission || [])
       .filter((data) => data.modulosAcciones?.id_modulos === 2)

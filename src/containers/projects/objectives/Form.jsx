@@ -10,52 +10,67 @@ import {
   Paper,
   Divider,
   Typography,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
+  TableBody,
+  TableCell,
+  TableRow,
+  Tooltip,
+  IconButton,
 } from "@material-ui/core";
-import { decrypt } from "../../../utils/crypt";
+import { decrypt,encrypt } from "../../../utils/crypt";
 import Header from "../../../components/Header";
 import Swal from "sweetalert2";
 import Backdrop from "../../../components/Backdrop";
+import Table from "../../../components/Table";
 import axios from "../../../api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit } from "@fortawesome/free-regular-svg-icons";
+import DeleteIcon from "@material-ui/icons/HighlightOff";
 
 function FormUser(props) {
-  const { userId, setBreadcrumps, groupId, permission, token } = props;
+  const { userId, setBreadcrumps, groupId, permission, token, page,rowsPerPage, } = props;
   const classes = useStyles();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [project, setProject] = useState([]);
+  const [filtro, setFiltro] = useState([]);
   const [error, setError] = useState({});
+  const id=decrypt(props.match.params.id);
   const [form, setForm] = useState({
     nombre: "",
     descripcion:"",
-    id_proyectos:"",
+    id_proyectos:id,
   });
 
   useEffect(() => {
-      getProjects();
-      if (props.match.params.id) {
-        getObjectives();
-        setBreadcrumps([
-          { name: "Proyecto", route: "/projects" },
-          { name: "Objetivos", route: "/objectives" },
-          { name: "Editar" },
-        ]);
-      } else {
-        setBreadcrumps([
-          { name: "Proyecto", route: "/projects" },
-          { name: "Objetivos", route: "/objectives" },
-          { name: "Crear" },
-        ]);
+      getProject();
+      getObjectives();
+      setBreadcrumps([
+        { name: "Proyecto", route: "/projects" },
+        { name: "Objetivos", },
+      ]);
+      if (props.match.url.includes('edit')) {
+        //getObjective();        
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getObjectives = async () => {
+    const getObjectives = async () => {
+      try {
+        const { data } = await axios.post(
+          `/objective/getObjectives`,
+          {"id_proyectos":id},
+          {
+            headers: { "access-token": token },
+          }
+        );
+          setFiltro(data.objectives);
+      } catch (error) {
+      history.push(`/projects`);
+      window.location.reload();
+    }
+  };
+
+  /* const getObjective = async () => {
     try {
-      const id = decrypt(props.match.params.id);
       const { data } = await axios.get(`/objective/${id}`, {
         headers: { "access-token": token },
       });
@@ -65,27 +80,19 @@ function FormUser(props) {
         id_proyectos:data.objective?.id_proyectos,
       });
     } catch (error) {
-      history.push("/objectives");
+      history.push(`/projects`)
       window.location.reload();
     }
-  };
+  }; */
 
-  const getProjects = async () => {
+  const getProject = async () => {
     try {
-      const { data } = await axios.post(
-        `/project/getProjects`,
-        {},
-        {
-          headers: { "access-token": token },
-        }
-      );
-      if (groupId === 1) {
-        setProject(data.projects);
-      } else {
-        setProject(data.projects.filter((item) => item.id !== 1));
-      }
+      const { data } = await axios.get(`/project/${id}`, {
+        headers: { "access-token": token },
+      });
+        setProject(data.project);
     } catch (error) {
-      history.push("/objectives");
+      history.push(`/projects`)
       window.location.reload();
     }
   };
@@ -98,13 +105,13 @@ function FormUser(props) {
   };
 
   const handleCancel = () => {
-    history.push("/objectives");
+    history.push(`/projects`)
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-      if (!props.match.params.id) {
+      if (!props.match.url.includes('edit')) {
         axios
           .post(
             `/objective/`,
@@ -116,7 +123,12 @@ function FormUser(props) {
           .then((res) => {
             setLoading(false);
             if (res.data.objective) {
-              history.push("/objectives");
+              getObjectives();
+              setForm({
+                nombre: "",
+                descripcion:"",
+                id_proyectos:id,
+              })
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -142,7 +154,6 @@ function FormUser(props) {
             });
           });
       } else {
-        const id = decrypt(props.match.params.id);
         axios
           .put(
             `/user/${id}`,
@@ -182,43 +193,36 @@ function FormUser(props) {
       }    
   };
 
+  const handleClick = (e, id, action) => {
+    switch (action) {
+      case "delete":
+        //modalDelete(id);
+        break;
+      case "edit":
+        //history.push(`/users/edit/${encrypt(id)}`);
+        break;
+      case "create":
+        //history.push(`/users/create`);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <Paper elevation={0}>
-      <Header search={false} buttonText={"Volver"} buttonRoute={"/users"} />
+      <Header search={false}
+        button={true} 
+        buttonText={"Entregables"}
+        buttonRoute={`/deliverables/create/${encrypt(id)}`} />
       <Divider />
       <div className={classes.paper}>
         <div className={classes.container}>
           <Typography component="h1" variant="h5">
-            {props.match.params.id ? "Editar" : "Agregar"} Objetivos
+            {project.nombre} 
           </Typography>
           <form className={classes.root} onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-            <Grid item xs={12}>
-                <FormControl required fullWidth variant="outlined">
-                  <InputLabel id="projectsLabel">Proyectos</InputLabel>
-                  <Select
-                    labelId="projectsLabel"
-                    label="Proyectos"
-                    value={form.id_proyectos}
-                    onChange={handleInput}
-                    name="id_proyectos"
-                    className={classes.container__input_root}
-                  >
-                    <MenuItem value="" disabled>
-                      <em>Seleccione una opción</em>
-                    </MenuItem>
-                    {project
-                      .sort((a, b) => (a.nombre < b.nombre ? -1 : 1))
-                      .map((data) => {
-                        return (
-                          <MenuItem key={`group-${data.id}`} value={data.id}>
-                            {data.nombre}
-                          </MenuItem>
-                        );
-                      })}
-                  </Select>
-                </FormControl>
-              </Grid>
               <Grid item xs={12} sm={12}>
                 <TextField
                   required
@@ -274,10 +278,74 @@ function FormUser(props) {
           </form>
         </div>
       </div>
+      <Typography component="h1" variant="h5" align="center">
+            Lista Objetivos
+      </Typography>
+      <Table columns={columns} rows={filtro}>
+        <TableBody>
+          {filtro?.length > 0 ? (
+            <>
+              {filtro
+                .map((row, index) => (
+                  <TableRow key={`row${index}`}>
+                    <TableCell align="center">{row.nombre}</TableCell>
+                    <TableCell align="center">{row.descripcion}</TableCell>
+                    <TableCell align="center">
+                        <Tooltip title="Editar">
+                          <IconButton
+                            aria-label="edit"
+                            onClick={(e) => handleClick(e, row.id, "edit")}
+                          >
+                            <FontAwesomeIcon icon={faEdit} size={"xs"} />
+                          </IconButton>
+                        </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                        <Tooltip title="Eliminar">
+                          <IconButton
+                            aria-label="delete"
+                            onClick={(e) => handleClick(e, row.id, "delete")}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </>
+          ) : (
+            <TableCell align="center" colSpan="8">
+              No hay datos registrados
+            </TableCell>
+          )}
+        </TableBody>
+      </Table>
       <Backdrop loading={loading} />
     </Paper>
   );
 }
+
+const columns = [
+  {
+    id: "name",
+    label: "Nombre",
+    minWidth: 100,
+    align: "center",
+  },
+  {
+    id: "lastname",
+    label: "descripción",
+    minWidth: 100,
+    align: "center",
+  },
+  {
+    id: "actions",
+    label: "",
+    minWidth: 10,
+    align: "center",
+    colSpan: 2,
+  },
+];
 
 const useStyles = makeStyles((theme) => ({
   root: {

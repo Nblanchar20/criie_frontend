@@ -9,9 +9,14 @@ import {
   Grid,
   Paper,
   Divider,
-  Typography,
+  Typography,    
+  TableBody,
+  TableCell,
+  TableRow,
+  Tooltip,
+  IconButton,
 } from "@material-ui/core";
-import { decrypt } from "../../utils/crypt";
+import { decrypt, encrypt } from "../../utils/crypt";
 import Header from "../../components/Header";
 import Swal from "sweetalert2";
 import Backdrop from "../../components/Backdrop";
@@ -23,6 +28,7 @@ import Modal from "../../components/Modal";
 import Objectives from"./objectives/create";
 import Deliverables from"./deliverables/create";
 import Indicators from"./indicators/create";
+import Projects from "./Projects";
 
 
 function FormUser(props) {
@@ -30,10 +36,7 @@ function FormUser(props) {
   const classes = useStyles();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const [modalObjective, setmodalObjective] = useState(false);
-  const [modalDeliverable, setmodalDeliverable] = useState(false);
-  const [modalIndicator, setmodalIndicator] = useState(false);
-  const [error, setError] = useState({});
+  const [error, setError] = useState({});;
   const [form, setForm] = useState({
     nombre: "",
     fecha_inicio: new Date(),
@@ -45,46 +48,14 @@ function FormUser(props) {
   });
 
   useEffect(() => {
-      if (props.match.url.includes('edit')) {
-        getProject();
         setBreadcrumps([
-          { name: "Configuración" },
-          { name: "Proyecto", route: "/projects" },
-          { name: "Editar" },
-        ]);
-      } else {
-        setBreadcrumps([
-          { name: "Configuración" },
           { name: "Proyecto", route: "/projects" },
           { name: "Crear" },
         ]);
-      }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getProject = async () => {
-    try {
-      const id = decrypt(props.match.params.id);
-      const { data } = await axios.get(`/project/${id}`, {
-        headers: { "access-token": token },
-      });
-      setForm({        
-        nombre: data.project?.nombre,
-        fecha_inicio: data.project?.fecha_inicio,
-        fecha_fin: data.project?.fecha_fin,
-        fecha_inicio_esperado: data.project?.fecha_inicio_esperado,
-        fecha_fin_esperado: data.project?.fecha_fin_esperado,
-        alcance: data.project?.alcance,
-        presupuesto: data.project?.presupuesto
-      });
-    } catch (error) {
-      history.push("/users");
-      window.location.reload();
-    }
-  };
-
-  const handleInput = (event) => {
-    
+  const handleInput = (event) => {    
     setForm({
       ...form,
       [event.target.name]: event.target.value,
@@ -96,10 +67,9 @@ function FormUser(props) {
   };
 
   const handleSubmit = (e) => {
-    console.log(form)
     e.preventDefault();
     setLoading(true);
-      if (!props.match.params.id) {
+    console.log("entre")
         axios
           .post(
             `/project/`,
@@ -111,7 +81,8 @@ function FormUser(props) {
           .then((res) => {
             setLoading(false);
             if (res.data.project) {
-              history.push("/projects");
+              //history.push("/projects");
+              history.push(`/objectives/create/${encrypt(res.data.project)}`);
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -136,45 +107,6 @@ function FormUser(props) {
               timer: 3000,
             });
           });
-      } else {
-        const id = decrypt(props.match.params.id);
-        axios
-          .post(
-            `/project/updateProject/${id}`,
-            { ...form},
-            {
-              headers: { "access-token": token },
-            }
-          )
-          .then((res) => {
-            setLoading(false);
-            if (res.data.updated) {
-              history.push("/projects");
-              Swal.fire({
-                icon: "success",
-                text: "Editado exitosamente.",
-                showConfirmButton: false,
-                timer: 3000,
-              });
-            } else {
-              Swal.fire({
-                icon: "error",
-                text: res.data.userUpdated.message,
-                showConfirmButton: false,
-                timer: 3000,
-              });
-            }
-          })
-          .catch((error) => {
-            setLoading(false);
-            Swal.fire({
-              icon: "error",
-              text: "No se ha podido editar.",
-              showConfirmButton: false,
-              timer: 3000,
-            });
-          });
-      }
     
   };
 
@@ -206,25 +138,13 @@ function FormUser(props) {
 
   return (
     <Paper elevation={0}>
-      <Header search={false} buttonText={"Volver"} buttonRoute={"/users"}
-
-      ObjectiveButton={props.match.url.includes('edit') ? true:false}
-      modalObjective={modalObjective}
-      setmodalObjective={setmodalObjective}
-
-      DeliverableButton={props.match.url.includes('edit') ? true:false}
-      modalDeliverable={modalDeliverable}
-      setmodalDeliverable={setmodalDeliverable}
-
-      IndicatorButton={props.match.url.includes('edit') ? true:false}
-      modalIndicator={modalIndicator}
-      setmodalIndicator={setmodalIndicator}
+      <Header search={false}
        />
       <Divider />
       <div className={classes.paper}>
         <div className={classes.container}>
           <Typography component="h1" variant="h5">
-            {props.match.params.id ? "Editar" : "Crear"} Proyecto
+            Crear Proyecto
           </Typography>
           <form className={classes.root} onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -331,9 +251,9 @@ function FormUser(props) {
                   }}
                 />
               </Grid>
-
             </Grid>
-            <div className={classes.containerButton}>
+            {props.match.url.includes('create') ? 
+              <div className={classes.containerButton}>
               <Button                
                 color="primary"
                 variant="contained"
@@ -350,53 +270,10 @@ function FormUser(props) {
               >
                 Cancelar
               </Button>
-            </div>              
+            </div>
+            :null}              
           </form>          
-        </div>
-        {props.match.url.includes('edit') ? 
-      <div className={classes.containerButton}>
-          {/* Modal Indicadores */}
-          <Modal
-            estado={modalIndicator}
-            cambiarEstado={setmodalIndicator}
-            titulo={"Agregar Indicadores "}
-            mostrarHeader={true}
-
-          >
-            <Indicators
-            id={decrypt(props.match.params.id)}
-            token={token}
-            />
-          </Modal>
-          {/* Modal Objetivos */}
-          <Modal
-            estado={modalObjective}
-            cambiarEstado={setmodalObjective}
-            titulo={"Agregar objetivo "}
-            mostrarHeader={true}
-
-          >
-            <Objectives
-            id={decrypt(props.match.params.id)}
-            token={token}
-            />
-          </Modal>
-          {/* Modal Entregables */}
-          <Modal
-            estado={modalDeliverable}
-            cambiarEstado={setmodalDeliverable}
-            titulo={"Agregar Entregables "}
-            mostrarHeader={true}
-
-          >
-            <Deliverables
-            id={decrypt(props.match.params.id)}
-            token={token}
-            />
-          </Modal>
-      </div>
-      :null     
-      }        
+        </div>   
       </div>      
       <Backdrop loading={loading} />
     </Paper>

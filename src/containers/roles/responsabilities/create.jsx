@@ -23,26 +23,25 @@ import {
 const Create = ({
     id,
     token,
-    metodo = null
 }) => {
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
+  const [role, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const [form, setForm] = useState({
-    nombre: "",
-    descripcion:"",
-    id_proyectos:id,
+    responsabilidades: "",
+    id_roles:id
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+        console.log(form)
         axios
           .post(
-            `/objective/`,
+            `/responsibility/`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,13 +49,10 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
+            if (res.data.responsibility) {
                 setForm(
                     {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
+                      responsabilidades: "",
                       }
                 )          
               Swal.fire({
@@ -88,21 +84,21 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getroles();
       }, []);
 
-      const getProjects = async () => {
+      const getroles = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/role/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setRoles(data?.role);
         } catch (error) {
-          history.push("/objectives");
+          history.push("/roles");
           window.location.reload();
         }
       };
@@ -112,13 +108,11 @@ const Create = ({
           ...form,
           [event.target.name]: event.target.value,
         });
-      };
-
-      
+      };      
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {role.nombre}
             </Typography>
             <Divider />
             <form className={classes.root} onSubmit={handleSubmit}>
@@ -127,9 +121,9 @@ const Create = ({
                 <TextField
                   required
                   fullWidth
-                  label="Nombre"
-                  name="nombre"
-                  value={form.nombre}
+                  label="Responsabilidades"
+                  name="responsabilidades"
+                  value={form.responsabilidades}
                   variant="outlined"
                   onChange={handleInput}
                   InputProps={{
@@ -138,26 +132,7 @@ const Create = ({
                     },
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={12}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Descripción"
-                  name="descripcion"
-                  value={form.descripcion}
-                  multiline
-                  rows ={3}
-                  variant="outlined"
-                  onChange={handleInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.container__input_root,
-                    },
-                  }}
-                />
-              </Grid>              
-                            
+              </Grid>       
             </Grid>
             <div className={classes.containerButton}>
               <Button

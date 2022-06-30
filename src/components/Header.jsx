@@ -9,6 +9,8 @@ import EditIcon from "@material-ui/icons/Edit";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ExportExcel from "./ExportExcel";
 import { useState } from "react";
+import axios from "../api";
+import Swal from "sweetalert2";
 
 function Header(props) {
   const {
@@ -42,10 +44,55 @@ function Header(props) {
     IndicatorButton= false,
     modalIndicator,
     setmodalIndicator,
+    ResponsabilityButton= false,
+    modalResponsability,
+    setmodalResponsability,
+    saveButton,
+    form,
+    id
   } = props;
   const classes = useStyles({ backButton });
   const history = useHistory();
 
+
+  const handleSubmit = () => {
+    console.log("entre")
+        axios
+          .post(
+            `/project/updateProject/${id}`,
+            { ...form},
+            {
+              headers: { "access-token": token },
+            }
+          )
+          .then((res) => {
+            if (res.data.updated) {
+              history.push("/projects");
+              Swal.fire({
+                icon: "success",
+                text: "Editado exitosamente.",
+                showConfirmButton: false,
+                timer: 3000,
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                text: res.data.userUpdated.message,
+                showConfirmButton: false,
+                timer: 3000,
+              });
+            }
+          })
+          .catch((error) => {
+            Swal.fire({
+              icon: "error",
+              text: "No se ha podido editar.",
+              showConfirmButton: false,
+              timer: 3000,
+            });
+          });
+    
+  };
   return (
     <div className={classes.header} variant="outlined">
       <Grid container spacing={0}>
@@ -87,7 +134,17 @@ function Header(props) {
           xs={12}
           sm={button || reloadButton ? 3 : 2}
           className={classes.containerSearch}
-        >
+        >          
+          {saveButton && (
+            <Button
+              color="primary"
+              variant="contained"
+              className={classes.button}
+              onClick={()=> handleSubmit()}
+            >
+              Guardar
+            </Button>
+          )}
           {button && (
             <Button
               color="primary"
@@ -152,37 +209,51 @@ function Header(props) {
           )}
           {ObjectiveButton && (
             <>
-            <Tooltip title="Crear">
+            <Tooltip title="Objetivo">
             <Button
                 color="primary"
                 variant="contained"
                 className={classes.button}
                 onClick={()=>setmodalObjective(!modalObjective)}
               >
-                Objetivo
+                Obj
             </Button>
             </Tooltip>
             </>              
                         
           )}
           {DeliverableButton && (
+              <Tooltip title="Entregables">
               <Button
                 color="primary"
                 variant="contained"
                 className={classes.button}
                 onClick={()=>setmodalDeliverable(!modalDeliverable)}
               >
-                Entregables
-              </Button>        
+                Ent
+              </Button> 
+              </Tooltip>       
           )}
           {IndicatorButton && (
+              <Tooltip title="Indicadores">
               <Button
                 color="primary"
                 variant="contained"
                 className={classes.button}
                 onClick={()=>setmodalIndicator(!modalIndicator)}
               >
-                Indicadores
+                Ind
+              </Button>
+              </Tooltip>       
+          )}
+          {ResponsabilityButton && (
+              <Button
+                color="primary"
+                variant="contained"
+                className={classes.button}
+                onClick={()=>setmodalResponsability(!modalResponsability)}
+              >
+                Responsabilidades
               </Button>       
           )}          
         </Grid>        

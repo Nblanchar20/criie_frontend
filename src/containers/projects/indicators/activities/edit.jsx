@@ -14,13 +14,16 @@ import {
     InputLabel,
     Select,
   } from "@material-ui/core";
-  import { encrypt } from "../../../utils/crypt";
-  import Header from "../../../components/Header";
+  import { encrypt } from "../../../../utils/crypt";
+  import Header from "../../../../components/Header";
   import Swal from "sweetalert2";
-  import Backdrop from "../../../components/Backdrop";
-  import axios from "../../../api";
+  import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+  import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+  import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+  import Backdrop from "../../../../components/Backdrop";
+  import axios from "../../../../api";
 
-const Create = ({
+const Edit = ({
     id,
     token,
     metodo = null
@@ -28,21 +31,22 @@ const Create = ({
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const [form, setForm] = useState({
     nombre: "",
-    descripcion:"",
-    id_proyectos:id,
+    descripcion_tecnica: "",
+    fecha_inicio:"",
+    fecha_fin:"",
+    vp_estado_actividad:""
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
         axios
-          .post(
-            `/objective/`,
+          .put(
+            `/activity/${id}`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,15 +54,9 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
-                setForm(
-                    {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
-                      }
-                )          
+            console.log(res.data)
+            if (res.data.updated) {
+                metodo()         
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -88,22 +86,28 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getActivity();
       }, []);
 
-      const getProjects = async () => {
+      const getActivity = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/activity/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setForm({
+            nombre: data.activity.nombre,
+            descripcion_tecnica: data.activity.descripcion_tecnica,
+            fecha_inicio:data.activity.fecha_inicio,
+            fecha_fin:data.activity.fecha_fin,
+            vp_estado_actividad:data.activity.vp_estado_actividad
+          })
         } catch (error) {
-          history.push("/objectives");
-          window.location.reload();
+          //history.push("/activitys");
+          //window.location.reload();
         }
       };
 
@@ -114,15 +118,27 @@ const Create = ({
         });
       };
 
+      const handleChangeInit = (newValue) => {
+        setForm({
+          ...form,
+          fecha_inicio: newValue
+        });
+      };
+      const handleChangeEnd = (newValue) => {
+        setForm({
+          ...form,
+          fecha_fin: newValue
+        });
+      };
       
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {form.nombre}
             </Typography>
             <Divider />
             <form className={classes.root} onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
+            <Grid container spacing={2}>        
               <Grid item xs={12} sm={12}>
                 <TextField
                   required
@@ -143,10 +159,10 @@ const Create = ({
                 <TextField
                   required
                   fullWidth
-                  label="Descripción"
-                  name="descripcion"
-                  value={form.descripcion}
+                  label="descripcion"
+                  name="descripcion_tecnica"
                   multiline
+                  value={form.descripcion_tecnica}
                   rows ={3}
                   variant="outlined"
                   onChange={handleInput}
@@ -156,8 +172,56 @@ const Create = ({
                     },
                   }}
                 />
-              </Grid>              
-                            
+              </Grid>
+              <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DesktopDatePicker
+                required
+                fullWidth
+                label="Fecha Inicio"
+                inputFormat="dd/MM/yyyy"
+                value={form.fecha_inicio}
+                onChange={handleChangeInit}
+                renderInput={(params) => <TextField {...params} />}
+              /> 
+              </LocalizationProvider>              
+              </Grid>
+              <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DesktopDatePicker
+                required
+                fullWidth
+                label="Fecha Finalizacion"
+                inputFormat="dd/MM/yyyy"
+                value={form.fecha_fin}
+                onChange={handleChangeEnd}
+                renderInput={(params) => <TextField {...params} />}
+              /> 
+              </LocalizationProvider>              
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl required fullWidth variant="outlined">
+                  <InputLabel id="projectsLabel">Estado</InputLabel>
+                  <Select
+                    labelId="projectsLabel"
+                    label="Proyectos"
+                    value={form.vp_estado_actividad}
+                    onChange={handleInput}
+                    name="vp_estado_actividad"
+                    className={classes.container__input_root}
+                  >
+                    <MenuItem value={1} >
+                      Pendiente
+                    </MenuItem>                    
+                    <MenuItem value={2} >
+                      En proceso
+                    </MenuItem>                    
+                    <MenuItem value={3} >
+                      Finalizado
+                    </MenuItem>                    
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
             <div className={classes.containerButton}>
               <Button
@@ -166,7 +230,7 @@ const Create = ({
                 className={classes.button}
                 type="submit"
               >
-                Agregar
+                Editar
               </Button>
             </div>
           </form>
@@ -174,7 +238,7 @@ const Create = ({
 	);
 }
  
-export default Create;
+export default Edit;
 
 const useStyles = makeStyles((theme) => ({
     root: {

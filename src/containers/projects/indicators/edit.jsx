@@ -20,7 +20,7 @@ import {
   import Backdrop from "../../../components/Backdrop";
   import axios from "../../../api";
 
-const Create = ({
+const Edit = ({
     id,
     token,
     metodo = null
@@ -28,21 +28,20 @@ const Create = ({
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
+  const [indicator, setIndicator] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const [form, setForm] = useState({
     nombre: "",
-    descripcion:"",
-    id_proyectos:id,
+    id_proyectos:"",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
         axios
-          .post(
-            `/objective/`,
+          .put(
+            `/indicator/${id}`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,15 +49,9 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
-                setForm(
-                    {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
-                      }
-                )          
+            console.log(res.data)
+            if (res.data.updated) {
+                metodo()         
               Swal.fire({
                 icon: "success",
                 text: "Creado exitosamente.",
@@ -88,22 +81,26 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getIndicator();
       }, []);
 
-      const getProjects = async () => {
+      const getIndicator = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/indicator/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setIndicator(data.indicator);
+          setForm({
+            nombre:data.indicator.nombre,
+            id_proyectos:data.indicator.id_proyectos
+          })
         } catch (error) {
-          history.push("/objectives");
-          window.location.reload();
+          //history.push("/indicators");
+          //window.location.reload();
         }
       };
 
@@ -118,7 +115,7 @@ const Create = ({
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {indicator.nombre}
             </Typography>
             <Divider />
             <form className={classes.root} onSubmit={handleSubmit}>
@@ -138,25 +135,7 @@ const Create = ({
                     },
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={12}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Descripción"
-                  name="descripcion"
-                  value={form.descripcion}
-                  multiline
-                  rows ={3}
-                  variant="outlined"
-                  onChange={handleInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.container__input_root,
-                    },
-                  }}
-                />
-              </Grid>              
+              </Grid>             
                             
             </Grid>
             <div className={classes.containerButton}>
@@ -166,7 +145,7 @@ const Create = ({
                 className={classes.button}
                 type="submit"
               >
-                Agregar
+                Editar
               </Button>
             </div>
           </form>
@@ -174,7 +153,7 @@ const Create = ({
 	);
 }
  
-export default Create;
+export default Edit;
 
 const useStyles = makeStyles((theme) => ({
     root: {

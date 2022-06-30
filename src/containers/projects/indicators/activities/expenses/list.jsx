@@ -9,32 +9,33 @@ import {
     Paper,
     Divider,
     Typography,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Select,
+    TableBody,
+    TableCell,
+    TableRow,
+    Tooltip,
+    IconButton,
   } from "@material-ui/core";
-  import { encrypt } from "../../../utils/crypt";
-  import Header from "../../../components/Header";
   import Swal from "sweetalert2";
-  import Backdrop from "../../../components/Backdrop";
-  import axios from "../../../api";
+  import axios from "../../../../../api";
+  import Table from "../../../../../components/Table";
 
 const Create = ({
     id,
     token,
-    metodo = null
+    metodo
 }) => {
 
     
   const history = useHistory();
-  const [project, setProject] = useState([]);
+  const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(false);
-  const classes = useStyles();
+  const classes = useStyles();  
+  const [filtro, setFiltro] = useState([]);
   const [form, setForm] = useState({
-    nombre: "",
-    descripcion:"",
-    id_proyectos:id,
+    gasto: "",
+    descripcion: "",
+    fecha: new Date(),
+    id_actividades:id,
   });
 
   const handleSubmit = (e) => {
@@ -42,7 +43,7 @@ const Create = ({
     setLoading(true);
         axios
           .post(
-            `/objective/`,
+            `/expense/`,
             { ...form},
             {
               headers: { "access-token": token },
@@ -50,13 +51,14 @@ const Create = ({
           )
           .then((res) => {
             setLoading(false);
-            if (res.data.objective) {
-                metodo()
+            if (res.data.expense) {
+              metodo()
                 setForm(
                     {
-                        nombre: "",
-                        descripcion:"",
-                        id_proyectos:id,
+                      gasto: "",
+                      descripcion: "",
+                      fecha: new Date(),
+                      id_actividades:id,
                       }
                 )          
               Swal.fire({
@@ -88,24 +90,41 @@ const Create = ({
     }
 
     useEffect(() => {
-          getProjects();
+          getActivity();
+          getExpenses();
       }, []);
 
-      const getProjects = async () => {
+      const getActivity = async () => {
         try {
           const { data } = await axios.get(
-            `/project/${id}`,
+            `/activity/${id}`,
             {},
             {
               headers: { "access-token": token },
             }
           );
-          setProject(data?.project);
+          setActivity(data?.activity);
         } catch (error) {
           history.push("/objectives");
           window.location.reload();
         }
       };
+
+      const getExpenses = async () => {
+        try {
+          const { data } = await axios.post(
+            `/expense/getExpenses`,
+            {"id_actividades":id},
+            {
+              headers: { "access-token": token },
+            }
+          );
+            setFiltro(data.expenses);
+        } catch (error) {
+          history.push(`/projects`);
+          window.location.reload();
+      }
+    };
 
       const handleInput = (event) => {
         setForm({
@@ -114,67 +133,74 @@ const Create = ({
         });
       };
 
+      const handleChangeInit = (newValue) => {
+        setForm({
+          ...form,
+          fecha_inicio: newValue
+        });
+      };
+
       
 	return (
 		<>
             <Typography component="h1" variant="h5">
-            {project.nombre}
+            {activity.nombre}
             </Typography>
             <Divider />
-            <form className={classes.root} onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={12}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Nombre"
-                  name="nombre"
-                  value={form.nombre}
-                  variant="outlined"
-                  onChange={handleInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.container__input_root,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={12}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Descripción"
-                  name="descripcion"
-                  value={form.descripcion}
-                  multiline
-                  rows ={3}
-                  variant="outlined"
-                  onChange={handleInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.container__input_root,
-                    },
-                  }}
-                />
-              </Grid>              
-                            
-            </Grid>
-            <div className={classes.containerButton}>
-              <Button
-                color="primary"
-                variant="contained"
-                className={classes.button}
-                type="submit"
-              >
-                Agregar
-              </Button>
-            </div>
-          </form>
+            <Table columns={columns} rows={filtro}>
+        <TableBody>
+          {filtro?.length > 0 ? (
+            <>
+              {filtro
+                .map((row, index) => (
+                  <TableRow key={`row${index}`}>
+                    <TableCell align="center">{row.descripcion}</TableCell>
+                    <TableCell align="center">{row.gasto}</TableCell>
+                    <TableCell align="center">{row.fecha}</TableCell>                                        
+                  </TableRow>
+                ))}
+            </>
+          ) : (
+            <TableCell align="center" colSpan="8">
+              No hay datos registrados
+            </TableCell>
+          )}
+        </TableBody>
+      </Table>
 		</>
 	);
 }
  
 export default Create;
+
+
+const columns = [
+    {
+      id: "name",
+      label: "Nombre",
+      minWidth: 100,
+      align: "center",
+    },
+    {
+      id: "lastname",
+      label: "descripción",
+      minWidth: 100,
+      align: "center",
+    },
+    {
+      id: "lastname",
+      label: "fecha",
+      minWidth: 100,
+      align: "center",
+    },
+    {
+      id: "actions",
+      label: "",
+      minWidth: 10,
+      align: "center",
+      colSpan: 2,
+    },
+  ];
 
 const useStyles = makeStyles((theme) => ({
     root: {
